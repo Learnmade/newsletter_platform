@@ -140,7 +140,38 @@ function HomeContent() {
                 )}
             </div>
 
-            {/* Subscribe Section */}
+            const [email, setEmail] = useState('');
+            const [submitting, setSubmitting] = useState(false);
+            const [message, setMessage] = useState(null); // {type: 'success' | 'error', text: '' }
+
+    const handleSubscribe = async (e) => {
+                e.preventDefault();
+            setSubmitting(true);
+            setMessage(null);
+
+            try {
+            const res = await fetch('/api/subscribe', {
+                method: 'POST',
+            headers: {'Content-Type': 'application/json' },
+            body: JSON.stringify({email}),
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                setMessage({ type: 'success', text: data.message });
+            setEmail('');
+            } else {
+                setMessage({ type: 'error', text: data.error });
+            }
+        } catch (error) {
+                setMessage({ type: 'error', text: 'Something went wrong. Please try again.' });
+        } finally {
+                setSubmitting(false);
+        }
+    };
+
+            return (
+            // Subscribe Section
             <div id="subscribe" className="relative py-32 overflow-hidden">
                 <div className="absolute inset-0 bg-gray-900">
                     <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/50 to-purple-900/50" />
@@ -150,19 +181,45 @@ function HomeContent() {
                     <p className="text-gray-300 mb-10 max-w-xl mx-auto text-lg">
                         Join 15,000+ developers receiving high-quality code breakdowns twice a week. No spam, just code.
                     </p>
-                    <form className="flex flex-col sm:flex-row gap-3 justify-center max-w-lg mx-auto" onSubmit={(e) => e.preventDefault()}>
+
+                    <form className="flex flex-col sm:flex-row gap-3 justify-center max-w-lg mx-auto" onSubmit={handleSubscribe}>
                         <input
                             type="email"
                             placeholder="Type your email..."
-                            className="px-6 py-4 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full font-medium"
+                            className="px-6 py-4 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full font-medium disabled:opacity-70"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            disabled={submitting}
+                            required
                         />
-                        <button className="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-500 transition-all shadow-lg hover:shadow-indigo-500/25">
-                            Subscribe
+                        <button
+                            disabled={submitting}
+                            className="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-500 transition-all shadow-lg hover:shadow-indigo-500/25 disabled:opacity-70 disabled:cursor-not-allowed min-w-[140px] flex justify-center items-center"
+                        >
+                            {submitting ? (
+                                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            ) : (
+                                'Subscribe'
+                            )}
                         </button>
                     </form>
+
+                    {message && (
+                        <div className={`mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium animate-fadeIn ${message.type === 'success' ? 'bg-green-500/10 text-green-300' : 'bg-red-500/10 text-red-300'
+                            }`}>
+                            {message.type === 'success' ? (
+                                <div className="w-2 h-2 rounded-full bg-green-400" />
+                            ) : (
+                                <div className="w-2 h-2 rounded-full bg-red-400" />
+                            )}
+                            {message.text}
+                        </div>
+                    )}
+
                     <p className="mt-6 text-sm text-gray-500">Unsubscribe at any time.</p>
                 </div>
             </div>
+            );
         </div>
     );
 }

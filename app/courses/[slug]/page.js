@@ -164,7 +164,7 @@ export default function CourseDetail({ params }) {
 
             {/* Footer */}
             <footer className="bg-white border-t border-gray-100 mt-20 py-12 text-center">
-                <p className="text-gray-400 text-sm font-medium">© 2024 DevNewsletter. Crafted for builders.</p>
+                <p className="text-gray-400 text-sm font-medium">© 2024 LearnMade. Crafted for builders.</p>
             </footer>
         </div>
     );

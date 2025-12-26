@@ -33,7 +33,7 @@ export default function AdminLayout({ children }) {
         <div className="min-h-screen flex bg-gray-50">
             {/* Sidebar */}
             <aside className="w-64 bg-gray-900 text-white p-6 hidden md:block">
-                <h1 className="text-2xl font-bold mb-10">Admin Newsletter</h1>
+                <h1 className="text-2xl font-bold mb-10">LearnMade Admin</h1>
                 <nav className="space-y-4">
                     <Link href="/admin/dashboard" className={`block py-2 px-4 rounded hover:bg-gray-800 ${pathname === '/admin/dashboard' ? 'bg-gray-800' : ''}`}>
                         Dashboard

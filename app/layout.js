@@ -5,7 +5,7 @@ import AuthProvider from "@/components/AuthProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-    title: "Newsletter Course Platform",
+    title: "LearnMade - Master Modern Development",
     description: "Learn with video, code, and explanations.",
 };
 

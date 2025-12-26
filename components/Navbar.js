@@ -30,7 +30,7 @@ export default function Navbar() {
                                 <Code2 size={24} />
                             </div>
                             <span className="font-bold text-xl tracking-tight text-gray-900 hidden sm:block group-hover:text-indigo-900 transition-colors">
-                                DevNewsletter
+                                LearnMade
                             </span>
                         </Link>
                     </div>
