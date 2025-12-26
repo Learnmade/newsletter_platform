@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { ArrowRight, Clock, Eye, Code2 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
-export default function Home() {
+function HomeContent() {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const searchParams = useSearchParams();
@@ -164,5 +164,13 @@ export default function Home() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function Home() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+            <HomeContent />
+        </Suspense>
     );
 }

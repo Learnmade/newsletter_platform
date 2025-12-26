@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { Github } from 'lucide-react';
 
-export default function LoginPage() {
+function LoginForm() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -13,6 +14,10 @@ export default function LoginPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const callbackUrl = searchParams.get('callbackUrl') || '/';
+
+    const handleGitHubLogin = () => {
+        signIn('github', { callbackUrl });
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -30,11 +35,6 @@ export default function LoginPage() {
                 setError('Invalid email or password');
                 setLoading(false);
             } else {
-                // Redirect logic handled by next-auth or manual routing if needed
-                // For now, we push to callbackUrl or Home, but NextAuth should handle redirect if we let it.
-                // But since we set redirect: false, we route manually.
-                // We'll let the session hook inside components/Navbar or middleware handle role based redirection if strictly needed,
-                // but typically:
                 router.push(callbackUrl);
                 router.refresh();
             }
@@ -45,18 +45,37 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50">
-            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg border border-gray-100">
+        <div className="flex items-center justify-center min-h-screen bg-gray-50/50">
+            <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-2xl shadow-xl border border-gray-100">
                 <div className="text-center">
-                    <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
-                    <p className="text-gray-500 mt-2">Sign in to your account</p>
+                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Welcome Back</h1>
+                    <p className="text-gray-500 mt-2">Sign in to retrieve your code</p>
                 </div>
 
-                {error && <div className="p-3 text-sm text-red-600 bg-red-50 rounded-lg text-center">{error}</div>}
+                {error && <div className="p-4 text-sm text-red-600 bg-red-50 rounded-xl text-center border border-red-100">{error}</div>}
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-4">
+                    <button
+                        onClick={handleGitHubLogin}
+                        className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-all font-semibold shadow-lg shadow-gray-900/10"
+                    >
+                        <Github size={20} />
+                        Sign in with GitHub
+                    </button>
+
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t border-gray-200" />
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                            <span className="px-2 bg-white text-gray-500">Or continue with email</span>
+                        </div>
+                    </div>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-5">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email</label>
                         <input
                             type="email"
                             required
@@ -94,5 +113,13 @@ export default function LoginPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-gray-50/50 flex items-center justify-center">Loading...</div>}>
+            <LoginForm />
+        </Suspense>
     );
 }

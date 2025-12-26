@@ -1,4 +1,5 @@
 import NextAuth from 'next-auth';
+import GitHubProvider from 'next-auth/providers/github';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
@@ -6,6 +7,10 @@ import bcrypt from 'bcryptjs';
 
 export const authOptions = {
     providers: [
+        GitHubProvider({
+            clientId: process.env.GITHUB_ID,
+            clientSecret: process.env.GITHUB_SECRET,
+        }),
         CredentialsProvider({
             name: 'Credentials',
             credentials: {
@@ -19,15 +24,16 @@ export const authOptions = {
 
                 await dbConnect();
 
-                // Find user - specifically looking for admin
-                // For the purpose of this task, we will allow a "seed" admin if none exists
-                // simplified logic: Check if any user exists, if not, create one with env credentials?
-                // Better: Just check database. User must be seeded manually or via script.
-
                 const user = await User.findOne({ email: credentials.email });
 
                 if (!user) {
                     throw new Error('Invalid email or password');
+                }
+
+                // If user registered via OAuth (no password), don't allow credentials login unless they set one?
+                // Or if password field is missing.
+                if (!user.password) {
+                    throw new Error('Please sign in with GitHub');
                 }
 
                 const isMatch = await bcrypt.compare(credentials.password, user.password);
@@ -44,10 +50,45 @@ export const authOptions = {
         strategy: 'jwt',
     },
     callbacks: {
-        async jwt({ token, user }) {
+        async signIn({ user, account }) {
+            if (account.provider === 'github') {
+                await dbConnect();
+                try {
+                    const existingUser = await User.findOne({ email: user.email });
+                    if (!existingUser) {
+                        await User.create({
+                            email: user.email,
+                            role: 'user',
+                            // password is not required
+                        });
+                    }
+                    return true;
+                } catch (error) {
+                    console.log('Error saving user', error);
+                    return false;
+                }
+            }
+            return true;
+        },
+        async jwt({ token, user, account }) {
             if (user) {
-                token.role = user.role;
-                token.id = user.id;
+                // If this is the first sign in, user object is available.
+                // We might need to fetch the role again if it was just created in signIn callback
+                // But for simplicity, let's assume if it came from DB authorize, it has role.
+                // If it came from GitHub, 'user' object from NextAuth might not have our DB role unless we fetch it.
+
+                // Better approach: Always fetch user from DB to get the role if not present
+                if (account?.provider === 'github') {
+                    await dbConnect();
+                    const dbUser = await User.findOne({ email: user.email });
+                    if (dbUser) {
+                        token.role = dbUser.role;
+                        token.id = dbUser._id.toString();
+                    }
+                } else {
+                    token.role = user.role;
+                    token.id = user.id;
+                }
             }
             return token;
         },
