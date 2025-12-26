@@ -12,6 +12,11 @@ function HomeContent() {
     const searchParams = useSearchParams();
     const searchQuery = searchParams.get('search');
 
+    // Subscription State
+    const [email, setEmail] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+    const [message, setMessage] = useState(null); // {type: 'success' | 'error', text: '' }
+
     useEffect(() => {
         fetchCourses();
     }, [searchQuery]);
@@ -29,6 +34,32 @@ function HomeContent() {
             console.error('Failed to fetch courses', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleSubscribe = async (e) => {
+        e.preventDefault();
+        setSubmitting(true);
+        setMessage(null);
+
+        try {
+            const res = await fetch('/api/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                setMessage({ type: 'success', text: data.message });
+                setEmail('');
+            } else {
+                setMessage({ type: 'error', text: data.error });
+            }
+        } catch (error) {
+            setMessage({ type: 'error', text: 'Something went wrong. Please try again.' });
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -140,38 +171,7 @@ function HomeContent() {
                 )}
             </div>
 
-            const [email, setEmail] = useState('');
-            const [submitting, setSubmitting] = useState(false);
-            const [message, setMessage] = useState(null); // {type: 'success' | 'error', text: '' }
-
-    const handleSubscribe = async (e) => {
-                e.preventDefault();
-            setSubmitting(true);
-            setMessage(null);
-
-            try {
-            const res = await fetch('/api/subscribe', {
-                method: 'POST',
-            headers: {'Content-Type': 'application/json' },
-            body: JSON.stringify({email}),
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                setMessage({ type: 'success', text: data.message });
-            setEmail('');
-            } else {
-                setMessage({ type: 'error', text: data.error });
-            }
-        } catch (error) {
-                setMessage({ type: 'error', text: 'Something went wrong. Please try again.' });
-        } finally {
-                setSubmitting(false);
-        }
-    };
-
-            return (
-            // Subscribe Section
+            {/* Subscribe Section */}
             <div id="subscribe" className="relative py-32 overflow-hidden">
                 <div className="absolute inset-0 bg-gray-900">
                     <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/50 to-purple-900/50" />
@@ -219,7 +219,6 @@ function HomeContent() {
                     <p className="mt-6 text-sm text-gray-500">Unsubscribe at any time.</p>
                 </div>
             </div>
-            );
         </div>
     );
 }
