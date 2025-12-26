@@ -57,7 +57,7 @@ export async function POST(req) {
         // Send Welcome Email
         try {
             const resend = new Resend(process.env.RESEND_API_KEY);
-            const fromEmail = process.env.FROM_EMAIL || 'LearnMade <onboarding@resend.dev>';
+            const fromEmail = process.env.FROM_EMAIL || 'LearnMade <no-reply@learn-made.in>';
 
             await resend.emails.send({
                 from: fromEmail,
