@@ -35,10 +35,14 @@ export async function POST(req) {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create user (default role is 'user')
+        // Determine role
+        const role = process.env.ADMIN_EMAIL === email ? 'admin' : 'user';
+
+        // Create user
         await User.create({
             email,
             password: hashedPassword,
+            role,
         });
 
         return NextResponse.json({ success: true, message: 'User created successfully' }, { status: 201 });

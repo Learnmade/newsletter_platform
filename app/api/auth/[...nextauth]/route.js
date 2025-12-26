@@ -56,9 +56,11 @@ export const authOptions = {
                 try {
                     const existingUser = await User.findOne({ email: user.email });
                     if (!existingUser) {
+                        const role = process.env.ADMIN_EMAIL === user.email ? 'admin' : 'user';
+
                         await User.create({
                             email: user.email,
-                            role: 'user',
+                            role: role,
                             // password is not required
                         });
                     }
@@ -71,15 +73,11 @@ export const authOptions = {
             return true;
         },
         async jwt({ token, user, account }) {
-            if (user) {
-                // If this is the first sign in, user object is available.
-                // We might need to fetch the role again if it was just created in signIn callback
-                // But for simplicity, let's assume if it came from DB authorize, it has role.
-                // If it came from GitHub, 'user' object from NextAuth might not have our DB role unless we fetch it.
+            await dbConnect();
 
-                // Better approach: Always fetch user from DB to get the role if not present
+            if (user) {
+                // Initial sign in
                 if (account?.provider === 'github') {
-                    await dbConnect();
                     const dbUser = await User.findOne({ email: user.email });
                     if (dbUser) {
                         token.role = dbUser.role;
@@ -88,6 +86,13 @@ export const authOptions = {
                 } else {
                     token.role = user.role;
                     token.id = user.id;
+                }
+            } else if (token?.email) {
+                // Subsequent calls - sync role from DB
+                const dbUser = await User.findOne({ email: token.email });
+                if (dbUser) {
+                    token.role = dbUser.role;
+                    token.id = dbUser._id.toString();
                 }
             }
             return token;
