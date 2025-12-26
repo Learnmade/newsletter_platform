@@ -57,8 +57,10 @@ export async function POST(req) {
         // Send Welcome Email
         try {
             const resend = new Resend(process.env.RESEND_API_KEY);
+            const fromEmail = process.env.FROM_EMAIL || 'LearnMade <onboarding@resend.dev>';
+            
             await resend.emails.send({
-                from: 'LearnMade <onboarding@resend.dev>', // Reverting to test domain for guaranteed delivery
+                from: fromEmail,
                 to: email,
                 subject: 'Welcome to LearnMade! 🚀',
                 html: WelcomeEmailTemplate(email),
