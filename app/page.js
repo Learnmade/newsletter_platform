@@ -14,6 +14,7 @@ function HomeContent() {
 
     // Subscription State
     const [email, setEmail] = useState('');
+    const [honey, setHoney] = useState(''); // Honeypot state
     const [submitting, setSubmitting] = useState(false);
     const [message, setMessage] = useState(null); // {type: 'success' | 'error', text: '' }
 
@@ -42,11 +43,19 @@ function HomeContent() {
         setSubmitting(true);
         setMessage(null);
 
+        // Honeypot check: If honey is filled, simulate success but do nothing
+        if (honey) {
+            setMessage({ type: 'success', text: 'Successfully subscribed! Check your inbox.' });
+            setEmail('');
+            setSubmitting(false);
+            return;
+        }
+
         try {
             const res = await fetch('/api/subscribe', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email }),
+                body: JSON.stringify({ email, confirm_email_address: honey }),
             });
             const data = await res.json();
 
@@ -183,6 +192,17 @@ function HomeContent() {
                     </p>
 
                     <form className="flex flex-col sm:flex-row gap-3 justify-center max-w-lg mx-auto" onSubmit={handleSubscribe}>
+                        {/* HONEYPOT: Hidden field to catch bots */}
+                        <input
+                            type="text"
+                            name="confirm_email_address"
+                            value={honey}
+                            onChange={(e) => setHoney(e.target.value)}
+                            style={{ display: 'none' }}
+                            tabIndex={-1}
+                            autoComplete="off"
+                        />
+
                         <input
                             type="email"
                             placeholder="Type your email..."

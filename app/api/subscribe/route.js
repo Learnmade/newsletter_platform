@@ -3,9 +3,11 @@ import Subscriber from '@/models/Subscriber';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { Resend } from 'resend';
+import { WelcomeEmailTemplate } from '@/lib/email-template';
 
 const subscribeSchema = z.object({
     email: z.string().email("Please enter a valid email address"),
+    honeypot: z.string().optional(), // Hidden field for spam bots
 });
 
 export async function POST(req) {
@@ -13,7 +15,11 @@ export async function POST(req) {
         const body = await req.json();
 
         // Validation
-        const validation = subscribeSchema.safeParse(body);
+        const validation = subscribeSchema.safeParse({
+            email: body.email,
+            honeypot: body.confirm_email_address // Map frontend field to schema
+        });
+
         if (!validation.success) {
             return NextResponse.json({
                 success: false,
@@ -21,7 +27,14 @@ export async function POST(req) {
             }, { status: 400 });
         }
 
-        const { email } = validation.data;
+        const { email, honeypot } = validation.data;
+
+        // SPAM PROTECTION: Honeypot check
+        // If the hidden field is filled, it's likely a bot. Silently return success.
+        if (honeypot) {
+            console.log("Spam bot detected (honeypot filled):", email);
+            return NextResponse.json({ success: true, message: 'Successfully subscribed! Check your inbox.' }, { status: 201 });
+        }
 
         await dbConnect();
 
@@ -32,6 +45,7 @@ export async function POST(req) {
                 // Reactivate if previously unsubscribed
                 existing.isActive = true;
                 await existing.save();
+                // We could resend welcome email here if we wanted
                 return NextResponse.json({ success: true, message: 'Welcome back! You have been resubscribed.' }, { status: 200 });
             }
             return NextResponse.json({ success: false, error: 'You are already subscribed!' }, { status: 409 });
@@ -44,24 +58,14 @@ export async function POST(req) {
         try {
             const resend = new Resend(process.env.RESEND_API_KEY);
             await resend.emails.send({
-                from: 'LearnMade <onboarding@resend.dev>', // Use resend.dev for testing if they don't have a domain yet, or tell them to update
+                from: 'LearnMade <no-reply@learn-made.in>', // Best practice: use a real subdomain if available, or stay with resend default for dev
                 to: email,
                 subject: 'Welcome to LearnMade! 🚀',
-                html: `
-                    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-                        <h1 style="color: #4F46E5;">Welcome to LearnMade!</h1>
-                        <p>Hey there,</p>
-                        <p>Thanks for subscribing to LearnMade. You're now on the list to receive high-quality code breakdowns and developer tutorials.</p>
-                        <p>Here is what you can expect:</p>
-                        <ul>
-                            <li>Deep dives into modern tech stacks</li>
-                            <li>Production-ready code snippets</li>
-                            <li>Software architecture explanations</li>
-                        </ul>
-                        <p>Stay tuned for our next issue!</p>
-                        <p>Happy coding,<br/>The LearnMade Team</p>
-                    </div>
-                `
+                html: WelcomeEmailTemplate(email),
+                headers: {
+                    'List-Unsubscribe': '<mailto:unsubscribe@learn-made.in>',
+                    'X-Entity-ID': 'LearnMade-Newsletter'
+                }
             });
         } catch (emailError) {
             console.error("Failed to send welcome email:", emailError);
