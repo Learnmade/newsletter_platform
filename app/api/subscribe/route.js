@@ -58,7 +58,7 @@ export async function POST(req) {
         try {
             const resend = new Resend(process.env.RESEND_API_KEY);
             const fromEmail = process.env.FROM_EMAIL || 'LearnMade <onboarding@resend.dev>';
-            
+
             await resend.emails.send({
                 from: fromEmail,
                 to: email,
@@ -71,7 +71,13 @@ export async function POST(req) {
             });
         } catch (emailError) {
             console.error("Failed to send welcome email:", emailError);
-            // Don't fail the request if email fails, just log it
+            // Specific handling for Resend Sandbox restriction
+            if (emailError.message && emailError.message.includes('only send testing emails')) {
+                console.warn("\n⚠️  RESEND SANDBOX WARNING: Email not sent.");
+                console.warn("   You are in Sandbox mode, which only allows sending to your own email.");
+                console.warn("   Recipient was:", email);
+                console.warn("   To fix: Verify your domain at resend.com or test with your registered email.\n");
+            }
         }
 
         return NextResponse.json({ success: true, message: 'Successfully subscribed! Check your inbox.' }, { status: 201 });
