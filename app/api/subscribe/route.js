@@ -58,7 +58,7 @@ export async function POST(req) {
         try {
             const resend = new Resend(process.env.RESEND_API_KEY);
             await resend.emails.send({
-                from: 'LearnMade <no-reply@learn-made.in>', // Best practice: use a real subdomain if available, or stay with resend default for dev
+                from: 'LearnMade <onboarding@resend.dev>', // Reverting to test domain for guaranteed delivery
                 to: email,
                 subject: 'Welcome to LearnMade! 🚀',
                 html: WelcomeEmailTemplate(email),
