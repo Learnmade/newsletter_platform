@@ -3,6 +3,9 @@ import Course from '@/models/Course';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]/route';
 import { NextResponse } from 'next/server';
+import Subscriber from '@/models/Subscriber';
+import { Resend } from 'resend';
+import { NewCourseEmailTemplate } from '@/lib/course-template';
 
 export async function GET(req) {
     try {
@@ -69,6 +72,45 @@ export async function POST(req) {
         }
 
         const course = await Course.create(validation.data);
+
+        // AUTHOR: Automated Email Broadcast
+        // Fire and forget - don't block the response
+        (async () => {
+            try {
+                const subscribers = await Subscriber.find({ isActive: true });
+                if (subscribers.length === 0) return;
+
+                const resend = new Resend(process.env.RESEND_API_KEY);
+                const fromEmail = process.env.FROM_EMAIL || 'LearnMade <no-reply@learn-made.in>';
+                const BATCH_SIZE = 50; // Resend limit is usually 100
+
+                // Split into batches
+                for (let i = 0; i < subscribers.length; i += BATCH_SIZE) {
+                    const batch = subscribers.slice(i, i + BATCH_SIZE);
+
+                    const emails = batch.map(sub => ({
+                        from: fromEmail,
+                        to: sub.email,
+                        subject: `New Course: ${course.title} 🚀`,
+                        html: NewCourseEmailTemplate(course),
+                        headers: {
+                            'List-Unsubscribe': '<mailto:unsubscribe@learn-made.in>',
+                            'X-Entity-ID': `LearnMade-Course-${course.slug}`
+                        }
+                    }));
+
+                    try {
+                        await resend.batch.send(emails);
+                        console.log(`Brodacast batch ${i / BATCH_SIZE + 1} sent to ${emails.length} subscribers.`);
+                    } catch (batchError) {
+                        console.error(`Failed to send batch ${i / BATCH_SIZE + 1}:`, batchError);
+                    }
+                }
+            } catch (broadcastError) {
+                console.error("Failed to broadcast new course email:", broadcastError);
+            }
+        })();
+
         return NextResponse.json({ success: true, data: course }, { status: 201 });
     } catch (error) {
         // Handle duplicate key error (E11000) for slug
