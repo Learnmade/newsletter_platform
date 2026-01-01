@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
-import { ArrowRight, Clock, Eye, Code2 } from 'lucide-react';
+import { ArrowRight, Clock, Eye, Code2, Terminal, Zap, Layers, CheckCircle2, Search } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
 function HomeContent() {
@@ -16,7 +16,7 @@ function HomeContent() {
     const [email, setEmail] = useState('');
     const [honey, setHoney] = useState(''); // Honeypot state
     const [submitting, setSubmitting] = useState(false);
-    const [message, setMessage] = useState(null); // {type: 'success' | 'error', text: '' }
+    const [message, setMessage] = useState(null);
 
     useEffect(() => {
         fetchCourses();
@@ -43,7 +43,6 @@ function HomeContent() {
         setSubmitting(true);
         setMessage(null);
 
-        // Honeypot check: If honey is filled, simulate success but do nothing
         if (honey) {
             setMessage({ type: 'success', text: 'Successfully subscribed! Check your inbox.' });
             setEmail('');
@@ -73,183 +72,276 @@ function HomeContent() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50/50">
+        <div className="min-h-screen bg-white">
             <Navbar />
 
             {/* Hero Section */}
-            <div className="relative overflow-hidden bg-white">
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 via-white to-purple-50/30" />
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 text-center">
-                    {courses.length > 0 ? (
-                        <Link href={`/courses/${courses[0].slug}`} className="inline-block py-1 px-3 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-sm font-semibold mb-6 animate-fadeIn hover:bg-indigo-100 transition-colors cursor-pointer">
-                            New: {courses[0].title}
-                        </Link>
-                    ) : (
-                        <span className="inline-block py-1 px-3 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-sm font-semibold mb-6 animate-fadeIn">
-                            New: Full-Stack Next.js Course Available
-                        </span>
-                    )}
-                    <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 tracking-tight mb-8 leading-tight">
-                        Master modern development <br />
-                        <span className="text-gradient">one newsletter at a time.</span>
-                    </h1>
-                    <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-12 leading-relaxed">
-                        Stop watching endless tutorials. Get production-ready code,
-                        deep-dive explanations, and file structures delivered to you.
-                    </p>
-                    <div className="flex flex-col sm:flex-row justify-center gap-4">
-                        <Link href="#courses" className="bg-gray-900 text-white px-8 py-4 rounded-xl font-semibold hover:bg-gray-800 transition-all hover:shadow-lg hover:-translate-y-1">
-                            Browse Library
-                        </Link>
-                        <Link href="#subscribe" className="bg-white text-gray-900 border border-gray-200 px-8 py-4 rounded-xl font-semibold hover:bg-gray-50 transition-all hover:border-gray-300">
-                            Get Latest Issue
-                        </Link>
-                    </div>
-
-                    <div className="mt-16 flex justify-center gap-8 text-gray-400 opacity-60 grayscale">
-                        {/* Add logos here if needed later */}
-                    </div>
-                </div>
-            </div>
-
-            {/* Course Grid */}
-            <div id="courses" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-                <div className="flex justify-between items-end mb-12">
-                    <div>
-                        <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                            {searchQuery ? `Results for "${searchQuery}"` : 'Latest Issues'}
-                        </h2>
-                        <p className="text-gray-500">Hand-crafted tutorials for professional developers.</p>
-                    </div>
-                </div>
-
-                {loading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className="bg-white rounded-2xl h-96 animate-pulse border border-gray-100"></div>
-                        ))}
-                    </div>
-                ) : courses.length === 0 ? (
-                    <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
-                        <h3 className="text-xl text-gray-600 font-medium">No courses found matching your criteria.</h3>
-                        <p className="text-gray-400 mt-2">Try searching for different keywords.</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {courses.map((course) => (
-                            <Link href={`/courses/${course.slug}`} key={course._id} className="group cursor-pointer h-full">
-                                <div className="bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-indigo-100 flex flex-col h-full group-hover:-translate-y-1">
-                                    <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
-                                        <img
-                                            src={course.thumbnail}
-                                            alt={course.title}
-                                            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    </div>
-
-                                    <div className="p-6 flex flex-col flex-1">
-                                        <div className="flex gap-2 mb-4">
-                                            {course.tags.slice(0, 2).map((tag, idx) => (
-                                                <span key={idx} className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 bg-gray-50 text-gray-600 rounded-full border border-gray-100 group-hover:bg-indigo-50 group-hover:text-indigo-600 group-hover:border-indigo-100 transition-colors">
-                                                    {tag}
-                                                </span>
-                                            ))}
-                                        </div>
-
-                                        <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-snug">
-                                            {course.title}
-                                        </h3>
-
-                                        <p className="text-gray-500 text-sm line-clamp-2 mb-6 leading-relaxed">
-                                            {course.description.substring(0, 100)}...
-                                        </p>
-
-                                        <div className="flex items-center gap-4 mt-auto text-sm text-gray-400 pt-4 border-t border-gray-50 group-hover:border-gray-100 transition-colors">
-                                            <div className="flex items-center gap-1.5">
-                                                <Clock size={16} />
-                                                <span>15 min read</span>
-                                            </div>
-                                            <div className="flex items-center gap-1.5">
-                                                <Code2 size={16} />
-                                                <span>Source Code</span>
-                                            </div>
-                                            <div className="flex items-center gap-1 ml-auto text-indigo-600 font-medium">
-                                                Read <ArrowRight size={16} className="transform group-hover:translate-x-1 transition-transform" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
-                )}
-            </div>
-
-            {/* Subscribe Section */}
-            <div id="subscribe" className="py-24 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gray-50/50" />
-
-                <div className="max-w-5xl mx-auto px-4 relative z-10">
-                    <div className="bg-gray-900 rounded-[2.5rem] p-8 md:p-20 relative overflow-hidden shadow-2xl shadow-indigo-500/20 ring-1 ring-white/10">
-                        {/* Background Effects */}
-                        <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-indigo-500/30 rounded-full blur-3xl opacity-50" />
-                        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl opacity-50" />
-
-                        <div className="relative text-center max-w-2xl mx-auto">
-                            <span className="text-indigo-400 font-bold tracking-wider uppercase text-xs mb-4 block">Newsletter</span>
-                            <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">
-                                Join the inner circle.
-                            </h2>
-                            <p className="text-lg text-gray-400 mb-10 leading-relaxed">
-                                Get exclusive access to new course drops, source code, and developer tips.
-                                Delivered straight to your inbox. No spam, ever.
-                            </p>
-
-                            <form className="flex flex-col sm:flex-row gap-4" onSubmit={handleSubscribe}>
-                                {/* Honeypot */}
-                                <input type="text" name="confirm_email_address" value={honey} onChange={(e) => setHoney(e.target.value)} className="hidden" tabIndex={-1} autoComplete="off" />
-
-                                <input
-                                    type="email"
-                                    placeholder="enter@email.com"
-                                    className="flex-1 px-6 py-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white/10 transition-all w-full font-medium"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    disabled={submitting}
-                                    required
-                                />
-                                <button
-                                    disabled={submitting}
-                                    className="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-500 transition-all shadow-lg hover:shadow-indigo-500/25 disabled:opacity-70 disabled:cursor-not-allowed min-w-[160px] flex justify-center items-center"
-                                >
-                                    {submitting ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Subscribe Now'}
-                                </button>
-                            </form>
-
-                            {message && (
-                                <div className={`mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium animate-fadeIn ${message.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                                    }`}>
-                                    {message.text}
-                                </div>
+            <div className="relative overflow-hidden pt-32 pb-20 lg:pt-40 lg:pb-32 bg-white">
+                <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+                        <div>
+                            {courses.length > 0 && (
+                                <Link href={`/courses/${courses[0].slug}`} className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-indigo-600 text-xs font-semibold uppercase tracking-wide mb-8 hover:bg-indigo-100 transition-colors">
+                                    <span className="w-2 h-2 bg-indigo-600 rounded-full animate-pulse" />
+                                    New Drop: {courses[0].title.substring(0, 30)}...
+                                </Link>
                             )}
+                            <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 tracking-tight leading-[1.1] mb-6">
+                                Build better software, <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">faster.</span>
+                            </h1>
+                            <p className="text-xl text-gray-500 max-w-lg leading-relaxed mb-10">
+                                Stop watching basic tutorials. Get full-stack, production-ready code breakdowns delivered to your inbox.
+                            </p>
+                            <div className="flex flex-wrap gap-4">
+                                <Link href="#courses" className="bg-gray-900 text-white px-8 py-4 rounded-xl font-semibold hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-1">
+                                    Start Learning
+                                </Link>
+                                <Link href="#subscribe" className="bg-white text-gray-900 border border-gray-200 px-8 py-4 rounded-xl font-semibold hover:bg-gray-50 transition-all">
+                                    Join Newsletter
+                                </Link>
+                            </div>
+                            <div className="mt-12 flex items-center gap-6 text-sm text-gray-400 font-medium">
+                                <div className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Production Ready</div>
+                                <div className="flex items-center gap-2"><CheckCircle2 size={16} className="text-green-500" /> Full Source Code</div>
+                            </div>
+                        </div>
 
-                            <div className="mt-10 flex flex-wrap justify-center gap-x-8 gap-y-4 text-sm text-gray-500 font-medium">
-                                <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-green-500 rounded-full" /> Weekly Updates</span>
-                                <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-green-500 rounded-full" /> Source Code</span>
-                                <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-green-500 rounded-full" /> 15k+ Members</span>
+                        {/* Hero Graphic / Code Mockup */}
+                        <div className="relative hidden lg:block">
+                            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20"></div>
+                            <div className="relative bg-gray-900 rounded-2xl border border-gray-800 shadow-2xl overflow-hidden">
+                                <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-800 bg-gray-900/50">
+                                    <div className="w-3 h-3 rounded-full bg-red-500" />
+                                    <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                                    <div className="w-3 h-3 rounded-full bg-green-500" />
+                                    <div className="ml-2 text-xs text-gray-500 font-mono">server.js</div>
+                                </div>
+                                <div className="p-6 overflow-hidden">
+                                    <pre className="font-mono text-sm text-gray-300 leading-relaxed">
+                                        <code>
+                                            <span className="text-purple-400">import</span> {'{'} NextResponse {'}'} <span className="text-purple-400">from</span> <span className="text-green-400">'next/server'</span>;<br />
+                                            <br />
+                                            <span className="text-purple-400">export async function</span> <span className="text-blue-400">GET</span>(req) {'{'}<br />
+                                            &nbsp;&nbsp;<span className="text-gray-500">// Production-ready API handler</span><br />
+                                            &nbsp;&nbsp;<span className="text-purple-400">const</span> data = <span className="text-purple-400">await</span> db.<span className="text-blue-400">query</span>(<span className="text-green-400">'SELECT * FROM users'</span>);<br />
+                                            <br />
+                                            &nbsp;&nbsp;<span className="text-purple-400">return</span> NextResponse.<span className="text-blue-400">json</span>({'{'}<br />
+                                            &nbsp;&nbsp;&nbsp;&nbsp;success: <span className="text-yellow-400">true</span>,<br />
+                                            &nbsp;&nbsp;&nbsp;&nbsp;data: data,<br />
+                                            &nbsp;&nbsp;&nbsp;&nbsp;cached: <span className="text-yellow-400">true</span><br />
+                                            &nbsp;&nbsp;{'}'});<br />
+                                            {'}'}
+                                        </code>
+                                    </pre>
+                                </div>
+                            </div>
+                            {/* Floating decorative cards */}
+                            <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-xl border border-gray-100 flex items-center gap-3 animate-bounce-slow">
+                                <div className="p-2 bg-green-100 text-green-600 rounded-lg">
+                                    <Zap size={20} />
+                                </div>
+                                <div>
+                                    <div className="text-xs text-gray-500 font-bold uppercase">Performance</div>
+                                    <div className="text-sm font-bold text-gray-900">100/100</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Features Section */}
+            <div className="py-24 bg-gray-50 border-y border-gray-100">
+                <div className="max-w-7xl mx-auto px-6 lg:px-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                        <div className="group">
+                            <div className="w-12 h-12 bg-white rounded-xl border border-gray-200 flex items-center justify-center text-gray-900 mb-6 shadow-sm group-hover:scale-110 transition-transform">
+                                <Terminal size={24} />
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-900 mb-3">No Fluff, Just Code</h3>
+                            <p className="text-gray-500 leading-relaxed">
+                                We skip the "what is a variable" talk. We build real-world systems like authentication, payments, and dashboards.
+                            </p>
+                        </div>
+                        <div className="group">
+                            <div className="w-12 h-12 bg-white rounded-xl border border-gray-200 flex items-center justify-center text-gray-900 mb-6 shadow-sm group-hover:scale-110 transition-transform">
+                                <Layers size={24} />
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-900 mb-3">Modern Stack</h3>
+                            <p className="text-gray-500 leading-relaxed">
+                                Always up to date. We use Next.js 14, React Server Components, TypeScript, Tailwind, and the latest tools.
+                            </p>
+                        </div>
+                        <div className="group">
+                            <div className="w-12 h-12 bg-white rounded-xl border border-gray-200 flex items-center justify-center text-gray-900 mb-6 shadow-sm group-hover:scale-110 transition-transform">
+                                <Code2 size={24} />
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-900 mb-3">Copy-Paste Ready</h3>
+                            <p className="text-gray-500 leading-relaxed">
+                                Every issue comes with a complete GitHub repository. Clone it, run it, and use it in your own projects.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Course Grid */}
+            <div id="courses" className="py-24 bg-white">
+                <div className="max-w-7xl mx-auto px-6 lg:px-8">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+                        <div>
+                            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                                {searchQuery ? `Results for "${searchQuery}"` : 'Latest Issues'}
+                            </h2>
+                            <p className="text-gray-500">Hand-crafted deep dives for professional developers.</p>
+                        </div>
+                        {!searchQuery && (
+                            <div className="hidden md:block">
+                                <Link href="#" className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
+                                    View Archive <ArrowRight size={16} />
+                                </Link>
+                            </div>
+                        )}
+                    </div>
+
+                    {loading ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="bg-gray-100 rounded-2xl h-96 animate-pulse"></div>
+                            ))}
+                        </div>
+                    ) : courses.length === 0 ? (
+                        <div className="text-center py-20 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
+                            <div className="bg-white p-4 rounded-full w-fit mx-auto mb-4 shadow-sm">
+                                <Search className="text-gray-400" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900">No courses found</h3>
+                            <p className="text-gray-500">We couldn't find anything for "{searchQuery}".</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {courses.map((course) => (
+                                <Link href={`/courses/${course.slug}`} key={course._id} className="group cursor-pointer flex flex-col h-full">
+                                    <div className="bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-indigo-100 flex flex-col h-full group-hover:-translate-y-1">
+                                        {/* Thumbnail */}
+                                        <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
+                                            {course.thumbnail ? (
+                                                <img
+                                                    src={course.thumbnail}
+                                                    alt={course.title}
+                                                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-400">
+                                                    <Code2 size={40} />
+                                                </div>
+                                            )}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60" />
+                                            <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                                                <div className="flex gap-2">
+                                                    {course.tags.slice(0, 2).map((tag, idx) => (
+                                                        <span key={idx} className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 bg-white/90 text-gray-900 rounded-md backdrop-blur-sm">
+                                                            {tag}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Content */}
+                                        <div className="p-6 flex flex-col flex-1">
+                                            <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-tight">
+                                                {course.title}
+                                            </h3>
+                                            <p className="text-gray-500 text-sm line-clamp-2 mb-6 leading-relaxed flex-1">
+                                                {course.description || "Learn how to build this project from scratch with best practices."}
+                                            </p>
+
+                                            <div className="flex items-center justify-between pt-4 border-t border-gray-50 mt-auto">
+                                                <div className="flex items-center gap-4 text-xs font-medium text-gray-500">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Eye size={14} />
+                                                        <span>{course.views || 0}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Clock size={14} />
+                                                        <span>15m</span>
+                                                    </div>
+                                                </div>
+                                                <span className="text-sm font-semibold text-indigo-600 group-hover:underline">Read Issue</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Subscribe Section */}
+            <div id="subscribe" className="py-24 relative overflow-hidden bg-gray-900">
+                <div className="absolute inset-0 opacity-20">
+                    <div className="absolute -top-24 -right-24 w-96 h-96 bg-purple-500 rounded-full blur-[100px]" />
+                    <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-500 rounded-full blur-[100px]" />
+                </div>
+
+                <div className="max-w-4xl mx-auto px-6 lg:px-8 relative z-10 text-center">
+                    <span className="inline-block py-1 px-3 rounded-full bg-white/10 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-6 border border-white/10">
+                        Join the Inner Circle
+                    </span>
+                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
+                        Get the newsletter developers <br /> actually read.
+                    </h2>
+                    <p className="text-lg text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+                        Join 15,000+ developers getting production-grade code, career tips, and early access to new courses. No spam, ever.
+                    </p>
+
+                    <form onSubmit={handleSubscribe} className="max-w-md mx-auto space-y-4">
+                        <input type="text" name="confirm_email_address" value={honey} onChange={(e) => setHoney(e.target.value)} className="hidden" tabIndex={-1} autoComplete="off" />
+
+                        <div className="relative">
+                            <input
+                                type="email"
+                                placeholder="enter@email.com"
+                                className="w-full px-6 py-4 rounded-xl bg-white/10 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white/20 transition-all font-medium text-center"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                disabled={submitting}
+                                required
+                            />
+                        </div>
+                        <button
+                            disabled={submitting}
+                            className="w-full bg-white text-gray-900 py-4 rounded-xl font-bold hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl disabled:opacity-70 flex justify-center items-center gap-2"
+                        >
+                            {submitting ? <div className="w-5 h-5 border-2 border-gray-900 border-t-transparent rounded-full animate-spin" /> : 'Subscribe for Free'}
+                        </button>
+                    </form>
+
+                    {message && (
+                        <div className={`mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium animate-fadeIn ${message.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                            {message.text}
+                        </div>
+                    )}
+
+                    <p className="mt-8 text-xs text-gray-500 font-medium">
+                        Unsubscribe at any time. We respect your privacy.
+                    </p>
+                </div>
+            </div>
+
+            {/* Simple Footer */}
+            <footer className="py-12 bg-white border-t border-gray-100 text-center">
+                <p className="text-gray-400 text-sm">© {new Date().getFullYear()} LearnMade. All rights reserved.</p>
+            </footer>
         </div>
     );
 }
 
 export default function Home() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+        <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" /></div>}>
             <HomeContent />
         </Suspense>
     );
