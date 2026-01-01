@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 export async function GET(req, { params }) {
     try {
         await dbConnect();
-        const { slug } = params;
+        const { slug } = await params;
 
         const course = await Course.findOne({ slug });
 

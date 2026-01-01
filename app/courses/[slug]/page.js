@@ -6,16 +6,20 @@ import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Copy, Check, FileCode, FolderTree, Play, Clock } from 'lucide-react';
+import { useParams } from 'next/navigation';
 
-export default function CourseDetail({ params }) {
+export default function CourseDetail() {
+    const params = useParams();
     const [course, setCourse] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('explanation'); // explanation, code, structure
     const [copied, setCopied] = useState(null);
 
     useEffect(() => {
-        fetchCourse();
-    }, []);
+        if (params?.slug) {
+            fetchCourse();
+        }
+    }, [params?.slug]);
 
     const fetchCourse = async () => {
         try {
