@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { PlusCircle, FileText, BarChart, Video } from 'lucide-react';
 
 export default function AdminDashboard() {
+    const [courses, setCourses] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [subscribers, setSubscribers] = useState([]);
     const [subLoading, setSubLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('courses');
