@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Code, FileText, Image as ImageIcon, Video } from 'lucide-react';
+import { Plus, Trash2, Code, FileText, Image as ImageIcon, Video, ArrowLeft, Loader2, Save } from 'lucide-react';
+import Link from 'next/link';
 
 export default function CreateCourse() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
 
     const [formData, setFormData] = useState({
         title: '',
@@ -27,7 +29,6 @@ export default function CreateCourse() {
         setFormData(prev => ({
             ...prev,
             [name]: value,
-            // Auto-generate slug from title if slug is empty
             slug: name === 'title' && !prev.slug ? value.toLowerCase().replace(/[^a-z0-9]+/g, '-') : (name === 'slug' ? value : prev.slug)
         }));
     };
@@ -60,9 +61,7 @@ export default function CreateCourse() {
 
             const res = await fetch('/api/courses', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
 
@@ -82,222 +81,269 @@ export default function CreateCourse() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8 pb-20">
-            <div className="border-b border-gray-200 pb-5">
-                <h1 className="text-3xl font-bold text-gray-900">Create New Course</h1>
-                <p className="mt-2 text-gray-500">Add a new video course with explanation and code.</p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-8">
-
-                {/* Basic Info Section */}
-                <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
-                    <h2 className="text-xl font-semibold flex items-center gap-2">
-                        <Video className="text-blue-500" /> Basic Information
-                    </h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">Course Title</label>
-                            <input
-                                type="text"
-                                name="title"
-                                required
-                                value={formData.title}
-                                onChange={handleChange}
-                                placeholder="e.g. Build a Netflix Clone"
-                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">Slug (URL friendly)</label>
-                            <input
-                                type="text"
-                                name="slug"
-                                required
-                                value={formData.slug}
-                                onChange={handleChange}
-                                placeholder="e.g. build-netflix-clone"
-                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                            />
+        <div className="min-h-screen bg-gray-50/50 pb-32">
+            {/* Header */}
+            <div className="bg-white border-b border-gray-200 sticky top-0 z-20">
+                <div className="max-w-5xl mx-auto px-6 h-20 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <Link href="/admin/dashboard" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500 hover:text-gray-900">
+                            <ArrowLeft size={20} />
+                        </Link>
+                        <div>
+                            <h1 className="text-xl font-bold text-gray-900">Create New Course</h1>
+                            <p className="text-xs text-gray-500">Draft mode</p>
                         </div>
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">Thumbnail Image</label>
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-4">
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={async (e) => {
-                                            const file = e.target.files?.[0];
-                                            if (!file) return;
-
-                                            setLoading(true); // Re-using loading state or add a specific one
-                                            const data = new FormData();
-                                            data.append('file', file);
-
-                                            try {
-                                                const res = await fetch('/api/upload', {
-                                                    method: 'POST',
-                                                    body: data,
-                                                });
-                                                const json = await res.json();
-                                                if (json.success) {
-                                                    setFormData(prev => ({ ...prev, thumbnail: json.url }));
-                                                } else {
-                                                    alert('Upload failed: ' + json.error);
-                                                }
-                                            } catch (err) {
-                                                console.error(err);
-                                                alert('Upload failed');
-                                            } finally {
-                                                setLoading(false);
-                                            }
-                                        }}
-                                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                                    />
-                                </div>
-                                {formData.thumbnail && (
-                                    <div className="mt-2 relative w-full h-40 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-                                        <img src={formData.thumbnail} alt="Preview" className="w-full h-full object-cover" />
-                                        <button
-                                            type="button"
-                                            onClick={() => setFormData(prev => ({ ...prev, thumbnail: '' }))}
-                                            className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
-                                        >
-                                            <Trash2 size={14} />
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">Video Embed URL</label>
-                            <input
-                                type="url"
-                                name="videoUrl"
-                                required
-                                value={formData.videoUrl}
-                                onChange={handleChange}
-                                placeholder="https://www.youtube.com/embed/..."
-                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Tags (comma separated)</label>
-                        <input
-                            type="text"
-                            name="tags"
-                            value={formData.tags}
-                            onChange={handleChange}
-                            placeholder="Next.js, MongoDB, React"
-                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                        />
-                    </div>
-                </section>
-
-                {/* Content Section */}
-                <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
-                    <h2 className="text-xl font-semibold flex items-center gap-2">
-                        <FileText className="text-green-500" /> Explanation & Structure
-                    </h2>
-
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Detailed Explanation (Markdown supported)</label>
-                        <textarea
-                            name="description"
-                            required
-                            rows={8}
-                            value={formData.description}
-                            onChange={handleChange}
-                            placeholder="# Introduction\n\nIn this course, we will build..."
-                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none font-mono text-sm"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">File Structure (Tree view)</label>
-                        <textarea
-                            name="fileStructure"
-                            rows={6}
-                            value={formData.fileStructure}
-                            onChange={handleChange}
-                            placeholder={".\n├── app/\n├── components/\n└── public/"}
-                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none font-mono text-sm"
-                        />
-                    </div>
-                </section>
-
-                {/* Code Snippets Section */}
-                <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
-                    <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-semibold flex items-center gap-2">
-                            <Code className="text-purple-500" /> Code Snippets
-                        </h2>
+                    <div className="flex items-center gap-3">
+                        <Link href="/admin/dashboard" className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+                            Cancel
+                        </Link>
                         <button
-                            type="button"
-                            onClick={addSnippet}
-                            className="text-sm text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1"
+                            onClick={handleSubmit}
+                            disabled={loading || uploading}
+                            className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-2.5 rounded-xl font-medium shadow-lg shadow-gray-200 hover:shadow-xl transition-all disabled:opacity-70 flex items-center gap-2"
                         >
-                            <Plus size={16} /> Add Snippet
+                            {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                            <span>Publish Course</span>
                         </button>
                     </div>
+                </div>
+            </div>
 
-                    <div className="space-y-6">
-                        {snippets.map((snippet, index) => (
-                            <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200 space-y-4">
-                                <div className="flex justify-between items-start">
-                                    <div className="grid grid-cols-2 gap-4 flex-1 mr-4">
+            <div className="max-w-5xl mx-auto px-6 py-10">
+                <form className="space-y-10">
+
+                    {/* Section 1: Core Details */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                        <div className="lg:col-span-1">
+                            <h2 className="text-lg font-semibold text-gray-900 mb-2">Core Details</h2>
+                            <p className="text-sm text-gray-500 leading-relaxed">
+                                Basic information about the course. The title and thumbnail are what users see first.
+                            </p>
+                        </div>
+                        <div className="lg:col-span-2 space-y-6">
+                            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Course Title</label>
+                                    <input
+                                        type="text"
+                                        name="title"
+                                        required
+                                        value={formData.title}
+                                        onChange={handleChange}
+                                        placeholder="e.g. Master Next.js 14"
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all font-medium text-gray-900 placeholder:text-gray-400"
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Slug</label>
                                         <input
                                             type="text"
-                                            placeholder="Snippet Title (e.g. db.js)"
-                                            value={snippet.title}
-                                            onChange={(e) => handleSnippetChange(index, 'title', e.target.value)}
-                                            className="px-3 py-2 border rounded focus:outline-none focus:border-purple-500 bg-white"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Language (e.g. javascript)"
-                                            value={snippet.language}
-                                            onChange={(e) => handleSnippetChange(index, 'language', e.target.value)}
-                                            className="px-3 py-2 border rounded focus:outline-none focus:border-purple-500 bg-white"
+                                            name="slug"
+                                            value={formData.slug}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm font-mono text-gray-600"
                                         />
                                     </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => removeSnippet(index)}
-                                        className="text-red-500 hover:text-red-700 p-2"
-                                    >
-                                        <Trash2 size={18} />
-                                    </button>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+                                        <input
+                                            type="text"
+                                            name="tags"
+                                            value={formData.tags}
+                                            onChange={handleChange}
+                                            placeholder="React, Backend"
+                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm"
+                                        />
+                                    </div>
                                 </div>
-                                <textarea
-                                    placeholder="// Paste your code here..."
-                                    value={snippet.code}
-                                    onChange={(e) => handleSnippetChange(index, 'code', e.target.value)}
-                                    rows={6}
-                                    className="w-full px-3 py-2 border rounded focus:outline-none focus:border-purple-500 font-mono text-sm bg-gray-900 text-gray-50"
-                                />
-                            </div>
-                        ))}
-                    </div>
-                </section>
 
-                <div className="sticky bottom-4 z-10 flex justify-end">
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all"
-                    >
-                        {loading ? 'Creating...' : 'Publish Course'}
-                    </button>
-                </div>
-            </form>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Thumbnail</label>
+                                    <div className="relative group">
+                                        <div className={`border-2 border-dashed border-gray-200 rounded-xl p-8 hover:bg-gray-50 transition-colors text-center ${formData.thumbnail ? 'hidden' : 'block'}`}>
+                                            <div className="w-12 h-12 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                <ImageIcon size={24} />
+                                            </div>
+                                            <p className="text-sm text-gray-600 font-medium">Click to upload image</p>
+                                            <p className="text-xs text-gray-400 mt-1">SVG, PNG, JPG or GIF (max. 2MB)</p>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                onChange={async (e) => {
+                                                    const file = e.target.files?.[0];
+                                                    if (!file) return;
+
+                                                    setUploading(true);
+                                                    const data = new FormData();
+                                                    data.append('file', file);
+
+                                                    try {
+                                                        const res = await fetch('/api/upload', {
+                                                            method: 'POST',
+                                                            body: data,
+                                                        });
+                                                        const json = await res.json();
+                                                        if (json.success) {
+                                                            setFormData(prev => ({ ...prev, thumbnail: json.url }));
+                                                        } else {
+                                                            alert('Upload failed: ' + json.error);
+                                                        }
+                                                    } catch (err) {
+                                                        console.error(err);
+                                                        alert('Upload failed');
+                                                    } finally {
+                                                        setUploading(false);
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+
+                                        {uploading && (
+                                            <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-xl z-10">
+                                                <Loader2 className="animate-spin text-indigo-500" />
+                                            </div>
+                                        )}
+
+                                        {formData.thumbnail && (
+                                            <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-sm border border-gray-100 group">
+                                                <img src={formData.thumbnail} alt="Thumbnail" className="w-full h-full object-cover" />
+                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setFormData(prev => ({ ...prev, thumbnail: '' }))}
+                                                        className="p-2 bg-white text-red-500 rounded-full hover:bg-red-50 transition-colors"
+                                                    >
+                                                        <Trash2 size={20} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr className="border-gray-200" />
+
+                    {/* Section 2: Content */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                        <div className="lg:col-span-1">
+                            <h2 className="text-lg font-semibold text-gray-900 mb-2">Content & Media</h2>
+                            <p className="text-sm text-gray-500 leading-relaxed">
+                                The meat of the course. Add your video URL and the written breakdown.
+                            </p>
+                        </div>
+                        <div className="lg:col-span-2 space-y-6">
+                            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Video Embed URL</label>
+                                    <div className="relative">
+                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                            <Video size={18} />
+                                        </div>
+                                        <input
+                                            type="url"
+                                            name="videoUrl"
+                                            value={formData.videoUrl}
+                                            onChange={handleChange}
+                                            placeholder="https://www.youtube.com/embed/..."
+                                            className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm font-medium"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Description / Article</label>
+                                    <textarea
+                                        name="description"
+                                        rows={12}
+                                        value={formData.description}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm leading-relaxed"
+                                        placeholder="Write your deep dive here..."
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">File Structure</label>
+                                    <textarea
+                                        name="fileStructure"
+                                        rows={8}
+                                        value={formData.fileStructure}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-3 bg-gray-900 border border-gray-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-mono text-gray-300 placeholder:text-gray-600"
+                                        placeholder={".\n├── app/\n│   ├── page.js\n│   └── layout.js"}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr className="border-gray-200" />
+
+                    {/* Section 3: Code */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                        <div className="lg:col-span-1">
+                            <h2 className="text-lg font-semibold text-gray-900 mb-2">Code Snippets</h2>
+                            <p className="text-sm text-gray-500 leading-relaxed">
+                                Share the exact code used in the video so users can copy-paste.
+                            </p>
+                            <button
+                                type="button"
+                                onClick={addSnippet}
+                                className="mt-4 text-sm font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+                            >
+                                <Plus size={16} /> Add Another Snippet
+                            </button>
+                        </div>
+                        <div className="lg:col-span-2 space-y-6">
+                            {snippets.map((snippet, index) => (
+                                <div key={index} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4 group hover:border-indigo-100 transition-colors">
+                                    <div className="flex items-center gap-4">
+                                        <input
+                                            type="text"
+                                            placeholder="Filename (e.g. page.js)"
+                                            value={snippet.title}
+                                            onChange={(e) => handleSnippetChange(index, 'title', e.target.value)}
+                                            className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-medium"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Language"
+                                            value={snippet.language}
+                                            onChange={(e) => handleSnippetChange(index, 'language', e.target.value)}
+                                            className="w-32 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-medium"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => removeSnippet(index)}
+                                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </div>
+                                    <div className="relative">
+                                        <Code className="absolute top-4 right-4 text-gray-500 opacity-20" size={20} />
+                                        <textarea
+                                            value={snippet.code}
+                                            onChange={(e) => handleSnippetChange(index, 'code', e.target.value)}
+                                            rows={8}
+                                            className="w-full px-4 py-4 bg-gray-900 text-gray-100 rounded-xl font-mono text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                                            placeholder="// Paste code..."
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                </form>
+            </div>
         </div>
     );
 }
