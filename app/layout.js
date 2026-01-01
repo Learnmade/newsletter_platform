@@ -30,11 +30,17 @@ export const metadata = {
     }
 };
 
+import AnalyticsTracker from "@/components/AnalyticsTracker";
+import { Suspense } from "react";
+
 export default function RootLayout({ children }) {
     return (
         <html lang="en">
             <body className={`${inter.className} antialiased text-gray-900 bg-white`}>
                 <AuthProvider>
+                    <Suspense fallback={null}>
+                        <AnalyticsTracker />
+                    </Suspense>
                     {children}
                 </AuthProvider>
             </body>

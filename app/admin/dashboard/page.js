@@ -2,17 +2,18 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { PlusCircle, Users, BarChart3, Video, TrendingUp, Search, MoreVertical, Trash2, ArrowRight } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { PlusCircle, Users, BarChart3, Video, TrendingUp, Search, MoreVertical, Trash2, ArrowRight, Globe, ScrollText } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts';
 
 export default function AdminDashboard() {
     const [courses, setCourses] = useState([]);
     const [subscribers, setSubscribers] = useState([]);
+    const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('courses');
 
     useEffect(() => {
-        Promise.all([fetchCourses(), fetchSubscribers()]).finally(() => setLoading(false));
+        Promise.all([fetchCourses(), fetchSubscribers(), fetchStats()]).finally(() => setLoading(false));
     }, []);
 
     const fetchCourses = async () => {
@@ -32,6 +33,16 @@ export default function AdminDashboard() {
             if (data.success) setSubscribers(data.data);
         } catch (error) {
             console.error('Failed to fetch subscribers:', error);
+        }
+    };
+
+    const fetchStats = async () => {
+        try {
+            const res = await fetch('/api/analytics/stats');
+            const data = await res.json();
+            if (data.success) setStats(data.data);
+        } catch (error) {
+            console.error('Failed to fetch stats:', error);
         }
     };
 
@@ -69,10 +80,6 @@ export default function AdminDashboard() {
             const date = new Date(now);
             date.setDate(date.getDate() - i);
             const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-            // Count items created on or before this day to show cumulative growth
-            // Actually, let's show "New Subscribers" per day for "Flow", or "Total" for growth.
-            // "Flow" usually implies activity. Let's do Cumulative Growth (Total Subs up to that day).
             const subsCount = subscribers.filter(s => new Date(s.createdAt) <= date).length;
 
             data.push({
@@ -113,7 +120,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Analytics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <StatsCard
                     title="Total Subscribers"
                     value={totalSubscribers}
@@ -122,7 +129,13 @@ export default function AdminDashboard() {
                     color="blue"
                 />
                 <StatsCard
-                    title="Total Views"
+                    title="Total Site Visits"
+                    value={stats?.totalVisits?.toLocaleString() || 0}
+                    icon={Globe}
+                    color="orange"
+                />
+                <StatsCard
+                    title="Course Views"
                     value={totalViews.toLocaleString()}
                     icon={BarChart3}
                     trend="+5%"
@@ -137,7 +150,7 @@ export default function AdminDashboard() {
                 />
             </div>
 
-            {/* Flow Graph Section */}
+            {/* Flow & Traffic Graph Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Chart */}
                 <div className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
@@ -160,54 +173,39 @@ export default function AdminDashboard() {
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                                <XAxis
-                                    dataKey="name"
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fontSize: 12, fill: '#9ca3af' }}
-                                    dy={10}
-                                />
-                                <YAxis
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fontSize: 12, fill: '#9ca3af' }}
-                                />
-                                <Tooltip
-                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                                />
-                                <Area
-                                    type="monotone"
-                                    dataKey="subscribers"
-                                    stroke="#3b82f6"
-                                    strokeWidth={3}
-                                    fillOpacity={1}
-                                    fill="url(#colorSubs)"
-                                />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} dy={10} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
+                                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                                <Area type="monotone" dataKey="subscribers" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorSubs)" />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
-                {/* Quick Actions / Mini List */}
-                <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-8 text-white flex flex-col justify-between shadow-lg shadow-indigo-200">
-                    <div>
-                        <h3 className="text-xl font-bold mb-2">Premium Access</h3>
-                        <p className="text-indigo-100 text-sm mb-6">Manage your premium subscribers and content details.</p>
+                {/* Traffic Sources */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col">
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">Top Sources</h3>
+                    <p className="text-sm text-gray-400 mb-6">Where your visitors are coming from</p>
 
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between bg-white/10 p-4 rounded-xl backdrop-blur-sm">
-                                <span className="text-sm font-medium">Active Subs</span>
-                                <span className="text-xl font-bold">{activeSubscribers}</span>
-                            </div>
-                            <div className="flex items-center justify-between bg-white/10 p-4 rounded-xl backdrop-blur-sm">
-                                <span className="text-sm font-medium">Churn Rate</span>
-                                <span className="text-xl font-bold">0.0%</span>
-                            </div>
-                        </div>
+                    <div className="flex-1 space-y-4">
+                        {stats?.topReferrers?.length > 0 ? (
+                            stats.topReferrers.map((ref, i) => (
+                                <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 shadow-sm">
+                                            {i + 1}
+                                        </div>
+                                        <span className="text-sm font-medium text-gray-900 truncate max-w-[120px]" title={ref._id}>
+                                            {ref._id.replace('https://', '').replace('http://', '').split('/')[0] || 'Unknown'}
+                                        </span>
+                                    </div>
+                                    <span className="text-sm font-bold text-gray-900">{ref.count}</span>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center py-10 text-gray-400 text-sm">No traffic data yet.</div>
+                        )}
                     </div>
-                    <button className="w-full bg-white text-indigo-600 py-3 rounded-xl font-bold mt-8 hover:bg-indigo-50 transition-colors">
-                        View Analytics Report
-                    </button>
                 </div>
             </div>
 
@@ -215,35 +213,24 @@ export default function AdminDashboard() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex space-x-1 bg-gray-100/50 p-1 rounded-xl w-fit">
-                        {['courses', 'subscribers'].map((tab) => (
+                        {['courses', 'subscribers', 'logs'].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
                                 className={`px-6 py-2.5 text-sm font-semibold rounded-lg capitalize transition-all ${activeTab === tab
-                                        ? 'bg-white text-gray-900 shadow-sm ring-1 ring-black/5'
-                                        : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200/50'
+                                    ? 'bg-white text-gray-900 shadow-sm ring-1 ring-black/5'
+                                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200/50'
                                     }`}
                             >
-                                {tab}
+                                {tab === 'logs' ? 'Live Logs' : tab}
                             </button>
                         ))}
                     </div>
-
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Search..."
-                            className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-64"
-                        />
-                    </div>
                 </div>
 
-                {activeTab === 'courses' ? (
-                    <CoursesTable courses={courses} />
-                ) : (
-                    <SubscribersTable subscribers={subscribers} onDelete={handleDeleteSubscriber} />
-                )}
+                {activeTab === 'courses' && <CoursesTable courses={courses} />}
+                {activeTab === 'subscribers' && <SubscribersTable subscribers={subscribers} onDelete={handleDeleteSubscriber} />}
+                {activeTab === 'logs' && <LogsTable logs={stats?.recentLogs || []} />}
             </div>
         </div>
     );
@@ -254,6 +241,7 @@ function StatsCard({ title, value, icon: Icon, trend, color, active }) {
         blue: 'bg-blue-50 text-blue-600',
         green: 'bg-green-50 text-green-600',
         purple: 'bg-purple-50 text-purple-600',
+        orange: 'bg-orange-50 text-orange-600',
     };
 
     return (
@@ -368,8 +356,8 @@ function SubscribersTable({ subscribers, onDelete }) {
                             </td>
                             <td className="px-6 py-4">
                                 <span className={`px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider rounded-full border ${sub.isActive
-                                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                                        : 'bg-red-50 text-red-600 border-red-100'
+                                    ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                    : 'bg-red-50 text-red-600 border-red-100'
                                     }`}>
                                     {sub.isActive ? 'Active' : 'Unsubscribed'}
                                 </span>
@@ -386,6 +374,51 @@ function SubscribersTable({ subscribers, onDelete }) {
                                 >
                                     <Trash2 size={16} />
                                 </button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}
+
+function LogsTable({ logs }) {
+    if (logs.length === 0) {
+        return <EmptyState message="No activity logs available." />;
+    }
+
+    return (
+        <div className="overflow-x-auto">
+            <table className="w-full text-left">
+                <thead className="bg-gray-50/50 text-gray-500 text-xs uppercase tracking-wider font-semibold border-b border-gray-100">
+                    <tr>
+                        <th className="px-6 py-4">Page</th>
+                        <th className="px-6 py-4">Source</th>
+                        <th className="px-6 py-4">User Agent</th>
+                        <th className="px-6 py-4">Time</th>
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                    {logs.map((log, i) => (
+                        <tr key={i} className="hover:bg-gray-50/50 transition-colors">
+                            <td className="px-6 py-4">
+                                <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded text-red-500 font-semibold">{log.path}</span>
+                            </td>
+                            <td className="px-6 py-4">
+                                <span className="text-sm text-gray-600 truncate max-w-[200px] block" title={log.referrer}>
+                                    {log.referrer}
+                                </span>
+                            </td>
+                            <td className="px-6 py-4">
+                                <span className="text-xs text-gray-400 truncate max-w-[200px] block" title={log.userAgent}>
+                                    {log.userAgent}
+                                </span>
+                            </td>
+                            <td className="px-6 py-4">
+                                <span className="text-xs text-gray-500">
+                                    {new Date(log.createdAt).toLocaleString()}
+                                </span>
                             </td>
                         </tr>
                     ))}
