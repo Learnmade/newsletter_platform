@@ -125,16 +125,54 @@ export default function CreateCourse() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">Thumbnail URL</label>
-                            <input
-                                type="url"
-                                name="thumbnail"
-                                required
-                                value={formData.thumbnail}
-                                onChange={handleChange}
-                                placeholder="https://..."
-                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                            />
+                            <label className="text-sm font-medium text-gray-700">Thumbnail Image</label>
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-4">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={async (e) => {
+                                            const file = e.target.files?.[0];
+                                            if (!file) return;
+
+                                            setLoading(true); // Re-using loading state or add a specific one
+                                            const data = new FormData();
+                                            data.append('file', file);
+
+                                            try {
+                                                const res = await fetch('/api/upload', {
+                                                    method: 'POST',
+                                                    body: data,
+                                                });
+                                                const json = await res.json();
+                                                if (json.success) {
+                                                    setFormData(prev => ({ ...prev, thumbnail: json.url }));
+                                                } else {
+                                                    alert('Upload failed: ' + json.error);
+                                                }
+                                            } catch (err) {
+                                                console.error(err);
+                                                alert('Upload failed');
+                                            } finally {
+                                                setLoading(false);
+                                            }
+                                        }}
+                                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                    />
+                                </div>
+                                {formData.thumbnail && (
+                                    <div className="mt-2 relative w-full h-40 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+                                        <img src={formData.thumbnail} alt="Preview" className="w-full h-full object-cover" />
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData(prev => ({ ...prev, thumbnail: '' }))}
+                                            className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">Video Embed URL</label>
