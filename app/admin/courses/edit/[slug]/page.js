@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Save, Trash2, Code, FileText, Video, ArrowLeft } from 'lucide-react';
+import { Save, Trash2, Code, FileText, Video, ArrowLeft, Image as ImageIcon, Link as LinkIcon, Hash, Layout, FileCode, Terminal } from 'lucide-react';
 import Link from 'next/link';
 
 export default function EditCourse() {
@@ -120,219 +120,274 @@ export default function EditCourse() {
         }
     };
 
-    if (loading) return <div className="p-10 text-center">Loading course data...</div>;
+    if (loading) return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-4">
+                <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                <p className="text-gray-500 font-medium">Loading editor...</p>
+            </div>
+        </div>
+    );
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8 pb-20">
-            <div className="border-b border-gray-200 pb-5 flex items-center gap-4">
-                <Link href="/admin/dashboard" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                    <ArrowLeft size={20} className="text-gray-600" />
-                </Link>
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Edit Course</h1>
-                    <p className="mt-2 text-gray-500">Update course content and code snippets.</p>
+        <div className="min-h-screen bg-gray-50/50 pb-32">
+            {/* Header */}
+            <div className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm backdrop-blur-xl bg-white/90">
+                <div className="max-w-5xl mx-auto px-6 h-20 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <Link href="/admin/dashboard" className="p-2.5 hover:bg-gray-100 rounded-xl transition-colors text-gray-500 hover:text-gray-900">
+                            <ArrowLeft size={20} />
+                        </Link>
+                        <div>
+                            <h1 className="text-xl font-bold text-gray-900 tracking-tight">Edit Course</h1>
+                            <p className="text-xs text-gray-500 font-medium">Updating: <span className="text-indigo-600 font-mono">{formData.slug}</span></p>
+                        </div>
+                    </div>
+                    <div className="flex gap-3">
+                        <Link href={`/courses/${formData.slug}`} target="_blank" className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+                            <Video size={16} /> Preview
+                        </Link>
+                        <button
+                            onClick={handleSubmit}
+                            disabled={saving}
+                            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-200 transition-all transform hover:scale-105 ${saving ? 'bg-indigo-400 cursor-wait' : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                                }`}
+                        >
+                            {saving ? (
+                                <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Saving...</>
+                            ) : (
+                                <><Save size={18} /> Save Changes</>
+                            )}
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-8">
-                {/* Basic Info Section */}
-                <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
-                    <h2 className="text-xl font-semibold flex items-center gap-2">
-                        <Video className="text-blue-500" /> Basic Information
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">Course Title</label>
-                            <input
-                                type="text"
-                                name="title"
-                                required
-                                value={formData.title}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                            />
+            <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
+                <form onSubmit={handleSubmit} className="space-y-10">
+                    {/* Basic Info Section */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div className="lg:col-span-1 space-y-4">
+                            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                <Layout className="text-indigo-500" size={20} />
+                                Core Details
+                            </h2>
+                            <p className="text-sm text-gray-500 leading-relaxed">
+                                Basic course information, visuals, and metadata. This is what users see first.
+                            </p>
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">Slug (Read Only)</label>
-                            <input
-                                type="text"
-                                name="slug"
-                                disabled // Slugs shouldn't be changed easily as it breaks SEO/Links
-                                value={formData.slug}
-                                className="w-full px-4 py-2 border rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed outline-none"
-                            />
+                        <div className="lg:col-span-2 bg-white rounded-3xl p-8 shadow-sm border border-gray-100 space-y-6">
+                            <div className="space-y-4">
+                                <label className="text-sm font-bold text-gray-700 ml-1">Course Title</label>
+                                <input
+                                    type="text"
+                                    name="title"
+                                    required
+                                    value={formData.title}
+                                    onChange={handleChange}
+                                    placeholder="e.g. Master Next.js 14"
+                                    className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent hover:bg-white hover:border-gray-200 focus:bg-white focus:border-indigo-500 rounded-2xl transition-all font-bold text-lg text-gray-900 placeholder:text-gray-400 outline-none"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-3">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Thumbnail</label>
+                                    <div className="group relative">
+                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                                            <ImageIcon size={18} />
+                                        </div>
+                                        <input
+                                            type="text" // Kept as text input for now, ideally file upload
+                                            name="thumbnail"
+                                            value={formData.thumbnail}
+                                            onChange={handleChange}
+                                            placeholder="Image URL"
+                                            className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm font-medium"
+                                        />
+                                    </div>
+                                    {/* Helper to show image preview if valid URL */}
+                                    {formData.thumbnail && (
+                                        <div className="relative aspect-video rounded-lg overflow-hidden border border-gray-100 shadow-sm mt-3">
+                                            <img src={formData.thumbnail} alt="Preview" className="object-cover w-full h-full" />
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="space-y-3">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Video URL</label>
+                                    <div className="group relative">
+                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                                            <Video size={18} />
+                                        </div>
+                                        <input
+                                            type="url"
+                                            name="videoUrl"
+                                            value={formData.videoUrl}
+                                            onChange={handleChange}
+                                            placeholder="YouTube Embed URL"
+                                            className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm font-medium"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-3">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">GitHub Repo</label>
+                                    <div className="group relative">
+                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                                            <LinkIcon size={18} />
+                                        </div>
+                                        <input
+                                            type="url"
+                                            name="repoUrl"
+                                            value={formData.repoUrl}
+                                            onChange={handleChange}
+                                            placeholder="https://github.com/..."
+                                            className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm font-medium"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-3">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Tags</label>
+                                    <div className="group relative">
+                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                                            <Hash size={18} />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            name="tags"
+                                            value={formData.tags}
+                                            onChange={handleChange}
+                                            placeholder="react, nextjs, beginners"
+                                            className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm font-medium"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    {/* ... (Rest of fields matching create page) ... */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">Thumbnail Image</label>
-                            <div className="space-y-2">
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={async (e) => {
-                                        const file = e.target.files?.[0];
-                                        if (!file) return;
 
-                                        // Use saving state or local loading state
-                                        const originalText = e.target.nextSibling?.innerText;
-                                        // Simple inline handling for now
+                    <div className="border-t border-gray-200/50" />
 
-                                        const data = new FormData();
-                                        data.append('file', file);
-
-                                        try {
-                                            const res = await fetch('/api/upload', {
-                                                method: 'POST',
-                                                body: data,
-                                            });
-                                            const json = await res.json();
-                                            if (json.success) {
-                                                setFormData(prev => ({ ...prev, thumbnail: json.url }));
-                                            } else {
-                                                alert('Upload failed: ' + json.error);
-                                            }
-                                        } catch (err) {
-                                            console.error(err);
-                                            alert('Upload failed');
-                                        }
-                                    }}
-                                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    {/* Content Section */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div className="lg:col-span-1 space-y-4">
+                            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                <FileText className="text-blue-500" size={20} />
+                                Content & Structure
+                            </h2>
+                            <p className="text-sm text-gray-500 leading-relaxed">
+                                The educational content. Supports Markdown for rich text formatting.
+                            </p>
+                        </div>
+                        <div className="lg:col-span-2 bg-white rounded-3xl p-8 shadow-sm border border-gray-100 space-y-8">
+                            <div className="space-y-3">
+                                <label className="text-sm font-bold text-gray-700 ml-1">Description (Markdown)</label>
+                                <div className="relative">
+                                    <textarea
+                                        name="description"
+                                        required
+                                        rows={12}
+                                        value={formData.description}
+                                        onChange={handleChange}
+                                        placeholder="# Introduction\n\nWrite your course content here..."
+                                        className="w-full p-5 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all font-mono text-sm leading-relaxed text-gray-800 resize-y"
+                                    />
+                                    <div className="absolute bottom-4 right-4 text-xs text-gray-400 font-medium pointer-events-none">Markdown Supported</div>
+                                </div>
+                            </div>
+                            <div className="space-y-3">
+                                <label className="text-sm font-bold text-gray-700 ml-1">File Structure</label>
+                                <textarea
+                                    name="fileStructure"
+                                    rows={8}
+                                    value={formData.fileStructure}
+                                    onChange={handleChange}
+                                    placeholder={`/app\n  page.js\n  layout.js`}
+                                    className="w-full p-5 bg-gray-900 border border-gray-800 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all font-mono text-sm leading-relaxed text-gray-300 resize-y"
                                 />
-                                {formData.thumbnail && (
-                                    <div className="mt-2 relative w-full h-40 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-                                        <img src={formData.thumbnail} alt="Preview" className="w-full h-full object-cover" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="border-t border-gray-200/50" />
+
+                    {/* Code Snippets Section */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div className="lg:col-span-1 space-y-4">
+                            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                <Code className="text-purple-500" size={20} />
+                                Code Snippets
+                            </h2>
+                            <p className="text-sm text-gray-500 leading-relaxed">
+                                Add copy-pasteable code blocks for users.
+                            </p>
+                            <button
+                                type="button"
+                                onClick={addSnippet}
+                                className="mt-4 px-5 py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold rounded-xl text-sm transition-colors flex items-center gap-2"
+                            >
+                                <Code size={16} /> Add New Snippet
+                            </button>
+                        </div>
+                        <div className="lg:col-span-2 space-y-6">
+                            {snippets.map((snippet, index) => (
+                                <div key={index} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 group transition-all hover:border-purple-200 hover:shadow-md">
+                                    <div className="bg-gray-50/50 px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+                                        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                                            <div className="relative group/input">
+                                                <FileCode className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Filename / Title"
+                                                    value={snippet.title}
+                                                    onChange={(e) => handleSnippetChange(index, 'title', e.target.value)}
+                                                    className="w-full pl-10 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                                                />
+                                            </div>
+                                            <div className="relative group/input">
+                                                <Terminal className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Language (js, css...)"
+                                                    value={snippet.language}
+                                                    onChange={(e) => handleSnippetChange(index, 'language', e.target.value)}
+                                                    className="w-full pl-10 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                                                />
+                                            </div>
+                                        </div>
                                         <button
                                             type="button"
-                                            onClick={() => setFormData(prev => ({ ...prev, thumbnail: '' }))}
-                                            className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                                            onClick={() => removeSnippet(index)}
+                                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                            title="Remove Snippet"
                                         >
-                                            <Trash2 size={14} />
+                                            <Trash2 size={18} />
                                         </button>
                                     </div>
-                                )}
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">Video Embed URL</label>
-                            <input
-                                type="url"
-                                name="videoUrl"
-                                required
-                                value={formData.videoUrl}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">GitHub Repo URL</label>
-                            <input
-                                type="url"
-                                name="repoUrl"
-                                value={formData.repoUrl}
-                                onChange={handleChange}
-                                placeholder="https://github.com/..."
-                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                            />
-                        </div>
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Tags (comma separated)</label>
-                        <input
-                            type="text"
-                            name="tags"
-                            value={formData.tags}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                        />
-                    </div>
-                </section>
-
-                {/* Content Section */}
-                <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
-                    <h2 className="text-xl font-semibold flex items-center gap-2">
-                        <FileText className="text-green-500" /> Explanation & Structure
-                    </h2>
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Detailed Explanation</label>
-                        <textarea
-                            name="description"
-                            required
-                            rows={8}
-                            value={formData.description}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none font-mono text-sm"
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">File Structure</label>
-                        <textarea
-                            name="fileStructure"
-                            rows={6}
-                            value={formData.fileStructure}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none font-mono text-sm"
-                        />
-                    </div>
-                </section>
-
-                {/* Snippets Section */}
-                <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
-                    <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-semibold flex items-center gap-2">
-                            <Code className="text-purple-500" /> Code Snippets
-                        </h2>
-                        <button type="button" onClick={addSnippet} className="text-sm text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1">
-                            <Code size={16} /> Add Snippet
-                        </button>
-                    </div>
-                    <div className="space-y-6">
-                        {snippets.map((snippet, index) => (
-                            <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200 space-y-4">
-                                <div className="flex justify-between items-start">
-                                    <div className="grid grid-cols-2 gap-4 flex-1 mr-4">
-                                        <input
-                                            type="text"
-                                            placeholder="Title"
-                                            value={snippet.title}
-                                            onChange={(e) => handleSnippetChange(index, 'title', e.target.value)}
-                                            className="px-3 py-2 border rounded focus:outline-none focus:border-purple-500 bg-white"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Language"
-                                            value={snippet.language}
-                                            onChange={(e) => handleSnippetChange(index, 'language', e.target.value)}
-                                            className="px-3 py-2 border rounded focus:outline-none focus:border-purple-500 bg-white"
+                                    <div className="p-1 bg-gray-900">
+                                        <textarea
+                                            placeholder="// Paste your code here..."
+                                            value={snippet.code}
+                                            onChange={(e) => handleSnippetChange(index, 'code', e.target.value)}
+                                            rows={8}
+                                            className="w-full p-5 bg-gray-900 text-gray-300 font-mono text-sm leading-relaxed focus:bg-gray-950 outline-none resize-y"
                                         />
                                     </div>
-                                    <button type="button" onClick={() => removeSnippet(index)} className="text-red-500 hover:text-red-700 p-2">
-                                        <Trash2 size={18} />
-                                    </button>
                                 </div>
-                                <textarea
-                                    placeholder="// Code here..."
-                                    value={snippet.code}
-                                    onChange={(e) => handleSnippetChange(index, 'code', e.target.value)}
-                                    rows={6}
-                                    className="w-full px-3 py-2 border rounded focus:outline-none focus:border-purple-500 font-mono text-sm bg-gray-900 text-gray-50"
-                                />
-                            </div>
-                        ))}
+                            ))}
+                            {snippets.length === 0 && (
+                                <div className="text-center py-12 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+                                    <Code className="mx-auto text-gray-300 mb-3" size={48} />
+                                    <h3 className="text-gray-900 font-bold">No snippets yet</h3>
+                                    <p className="text-gray-500 text-sm mt-1">Add code blocks to help users follow along.</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                </section>
-
-                <div className="sticky bottom-4 z-10 flex justify-end">
-                    <button
-                        type="submit"
-                        disabled={saving}
-                        className="bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all flex items-center gap-2"
-                    >
-                        {saving ? 'Saving...' : <><Save size={18} /> Save Changes</>}
-                    </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     );
 }

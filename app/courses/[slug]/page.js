@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { Copy, Check, FileCode, FolderTree, Play, Clock, ArrowLeft, ChevronRight, Eye } from 'lucide-react';
+import { Copy, Check, FileCode, FolderTree, Play, Clock, ArrowLeft, ChevronRight, Eye, Lightbulb } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -129,8 +129,54 @@ export default function CourseDetail() {
                         {/* Content Area */}
                         <div className="min-h-[500px]">
                             {activeTab === 'explanation' && (
-                                <div className="prose prose-lg prose-slate max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-indigo-600 prose-img:rounded-xl">
-                                    <ReactMarkdown>{course.description}</ReactMarkdown>
+                                <div className="max-w-none">
+                                    <ReactMarkdown
+                                        components={{
+                                            h1: ({ children }) => <h1 className="text-3xl font-bold text-gray-900 mb-6 mt-8 pb-4 border-b border-gray-100">{children}</h1>,
+                                            h2: ({ children }) => (
+                                                <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4 flex items-center gap-2 group">
+                                                    <div className="w-1.5 h-6 bg-indigo-500 rounded-full group-hover:h-8 transition-all" />
+                                                    {children}
+                                                </h2>
+                                            ),
+                                            h3: ({ children }) => <h3 className="text-xl font-bold text-gray-800 mt-8 mb-3">{children}</h3>,
+                                            p: ({ children }) => <p className="text-gray-600 leading-8 mb-6 text-lg tracking-wide">{children}</p>,
+                                            ul: ({ children }) => <ul className="space-y-3 my-6 pl-4">{children}</ul>,
+                                            ol: ({ children }) => <ol className="space-y-3 my-6 list-decimal list-inside pl-2">{children}</ol>,
+                                            li: ({ children }) => (
+                                                <li className="flex items-start gap-3 text-gray-700 leading-relaxed group">
+                                                    <span className="mt-2.5 w-1.5 h-1.5 bg-indigo-400 rounded-full shrink-0 group-hover:bg-indigo-600 transition-colors" />
+                                                    <span>{children}</span>
+                                                </li>
+                                            ),
+                                            blockquote: ({ children }) => (
+                                                <div className="my-8 bg-gradient-to-r from-indigo-50 to-blue-50/50 border-l-4 border-indigo-500 p-6 rounded-r-xl shadow-sm">
+                                                    <div className="flex items-center gap-2 text-indigo-700 font-bold mb-3 uppercase text-xs tracking-wider">
+                                                        <span className="p-1 bg-indigo-100 rounded">NOTE</span>
+                                                    </div>
+                                                    <div className="text-indigo-900/80 italic font-medium leading-relaxed">{children}</div>
+                                                </div>
+                                            ),
+                                            code: ({ inline, className, children }) => {
+                                                if (inline) {
+                                                    return <code className="bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded-md font-mono text-sm font-bold border border-indigo-100/50">{children}</code>;
+                                                }
+                                                return (
+                                                    <pre className="bg-gray-900 text-gray-50 p-6 rounded-2xl overflow-x-auto my-8 shadow-xl border border-gray-800 font-mono text-sm leading-relaxed">
+                                                        {children}
+                                                    </pre>
+                                                );
+                                            },
+                                            a: ({ href, children }) => (
+                                                <a href={href} className="text-indigo-600 font-semibold underline decoration-indigo-200 decoration-2 underline-offset-2 hover:decoration-indigo-500 hover:text-indigo-700 transition-all">
+                                                    {children}
+                                                </a>
+                                            ),
+                                            strong: ({ children }) => <strong className="font-bold text-gray-900">{children}</strong>,
+                                        }}
+                                    >
+                                        {course.description}
+                                    </ReactMarkdown>
                                 </div>
                             )}
 
@@ -187,6 +233,26 @@ export default function CourseDetail() {
                         </div>
                     </div>
 
+                    {/* Mobile CTA Card (Visible only on small screens) */}
+                    <div className="lg:hidden mt-8 bg-gradient-to-br from-indigo-600 to-violet-700 rounded-2xl p-6 text-white text-center shadow-lg shadow-indigo-200">
+                        <h3 className="font-bold text-lg mb-2">Want the full source?</h3>
+                        <p className="text-indigo-100 text-sm mb-6">Get access to this project and 50+ others in our GitHub repo.</p>
+                        {course.repoUrl ? (
+                            <a
+                                href={course.repoUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block w-full bg-white text-indigo-600 font-bold py-3 rounded-xl hover:bg-gray-50 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 duration-200"
+                            >
+                                Access Repository
+                            </a>
+                        ) : (
+                            <button disabled className="w-full bg-white/50 text-indigo-200 font-bold py-3 rounded-xl cursor-not-allowed">
+                                Repository Unavailable
+                            </button>
+                        )}
+                    </div>
+
                     {/* Sidebar (Desktop Only) */}
                     <div className="hidden lg:block space-y-8">
                         <div>
@@ -225,7 +291,7 @@ export default function CourseDetail() {
                         </div>
                     </div>
                 </div>
-            </main>
-        </div>
+            </main >
+        </div >
     );
 }
