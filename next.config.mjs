@@ -19,7 +19,7 @@ const nextConfig = {
           },
           {
             key: 'X-Frame-Options',
-            value: 'SAMEORIGIN' // Allows iframe only from same origin (needed for admin dashboard video preview if local?) Actually maybe DENY is better but we embed youtube. Youtube is external. This header controls who can embed US.
+            value: 'SAMEORIGIN'
           },
           {
             key: 'X-Content-Type-Options',
@@ -31,7 +31,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://res.cloudinary.com; font-src 'self'; connect-src 'self' https://res.cloudinary.com;"
+            value: "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"
           }
         ]
       }
@@ -45,7 +45,6 @@ const nextConfig = {
       },
     ],
   },
-  /* config options here */
 };
 
 export default nextConfig;
