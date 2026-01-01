@@ -15,6 +15,7 @@ export default function CreateCourse() {
         slug: '',
         thumbnail: '',
         videoUrl: '',
+        repoUrl: '',
         description: '',
         fileStructure: '',
         tags: '',
@@ -241,19 +242,39 @@ export default function CreateCourse() {
                         <div className="lg:col-span-2 space-y-6">
                             <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Video Embed URL</label>
-                                    <div className="relative">
-                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                                            <Video size={18} />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Video Embed URL</label>
+                                            <div className="relative">
+                                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                                    <Video size={18} />
+                                                </div>
+                                                <input
+                                                    type="url"
+                                                    name="videoUrl"
+                                                    value={formData.videoUrl}
+                                                    onChange={handleChange}
+                                                    placeholder="YouTube URL"
+                                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm font-medium"
+                                                />
+                                            </div>
                                         </div>
-                                        <input
-                                            type="url"
-                                            name="videoUrl"
-                                            value={formData.videoUrl}
-                                            onChange={handleChange}
-                                            placeholder="https://www.youtube.com/embed/..."
-                                            className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm font-medium"
-                                        />
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">GitHub Repo URL</label>
+                                            <div className="relative">
+                                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                                    <Code size={18} />
+                                                </div>
+                                                <input
+                                                    type="url"
+                                                    name="repoUrl"
+                                                    value={formData.repoUrl}
+                                                    onChange={handleChange}
+                                                    placeholder="GitHub Repo URL"
+                                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm font-medium"
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 

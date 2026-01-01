@@ -20,6 +20,7 @@ export default function EditCourse() {
         slug: '',
         thumbnail: '',
         videoUrl: '',
+        repoUrl: '',
         description: '',
         fileStructure: '',
         tags: '',
@@ -45,6 +46,7 @@ export default function EditCourse() {
                     slug: course.slug,
                     thumbnail: course.thumbnail,
                     videoUrl: course.videoUrl,
+                    repoUrl: course.repoUrl || '',
                     description: course.description,
                     fileStructure: course.fileStructure || '',
                     tags: course.tags.join(', '),
@@ -172,11 +174,11 @@ export default function EditCourse() {
                                     onChange={async (e) => {
                                         const file = e.target.files?.[0];
                                         if (!file) return;
-                                        
+
                                         // Use saving state or local loading state
-                                        const originalText = e.target.nextSibling?.innerText; 
+                                        const originalText = e.target.nextSibling?.innerText;
                                         // Simple inline handling for now
-                                        
+
                                         const data = new FormData();
                                         data.append('file', file);
 
@@ -220,6 +222,17 @@ export default function EditCourse() {
                                 required
                                 value={formData.videoUrl}
                                 onChange={handleChange}
+                                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700">GitHub Repo URL</label>
+                            <input
+                                type="url"
+                                name="repoUrl"
+                                value={formData.repoUrl}
+                                onChange={handleChange}
+                                placeholder="https://github.com/..."
                                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                         </div>

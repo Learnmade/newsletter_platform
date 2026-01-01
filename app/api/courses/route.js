@@ -46,6 +46,7 @@ const courseSchema = z.object({
     videoUrl: z.string().url("Invalid video URL"),
     description: z.string().min(10, "Description is too short"),
     fileStructure: z.string().optional(),
+    repoUrl: z.string().url("Invalid GitHub URL").optional(),
     tags: z.array(z.string()),
     codeSnippets: z.array(snippetSchema).optional(),
 });

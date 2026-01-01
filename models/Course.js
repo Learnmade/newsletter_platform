@@ -46,6 +46,10 @@ const CourseSchema = new mongoose.Schema({
     tags: {
         type: [String],
     },
+    repoUrl: {
+        type: String,
+        required: false,
+    },
     views: {
         type: Number,
         default: 0,
