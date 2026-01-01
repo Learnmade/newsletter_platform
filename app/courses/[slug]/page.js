@@ -205,26 +205,27 @@ export default function CourseDetail() {
                         </div>
 
                         {/* CTA Card */}
-                        <h3 className="font-bold text-lg mb-2">Want the full source?</h3>
-                        <p className="text-indigo-100 text-sm mb-6">Get access to this project and 50+ others in our GitHub repo.</p>
-                        {course.repoUrl ? (
-                            <a
-                                href={course.repoUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block w-full bg-white text-indigo-600 font-bold py-3 rounded-xl hover:bg-gray-50 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 duration-200"
-                            >
-                                Access Repository
-                            </a>
-                        ) : (
-                            <button disabled className="w-full bg-white/50 text-indigo-200 font-bold py-3 rounded-xl cursor-not-allowed">
-                                Repository Unavailable
-                            </button>
-                        )}
+                        <div className="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-2xl p-6 text-white text-center shadow-lg shadow-indigo-200">
+                            <h3 className="font-bold text-lg mb-2">Want the full source?</h3>
+                            <p className="text-indigo-100 text-sm mb-6">Get access to this project and 50+ others in our GitHub repo.</p>
+                            {course.repoUrl ? (
+                                <a
+                                    href={course.repoUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block w-full bg-white text-indigo-600 font-bold py-3 rounded-xl hover:bg-gray-50 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 duration-200"
+                                >
+                                    Access Repository
+                                </a>
+                            ) : (
+                                <button disabled className="w-full bg-white/50 text-indigo-200 font-bold py-3 rounded-xl cursor-not-allowed">
+                                    Repository Unavailable
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
+            </main>
         </div>
-            </main >
-        </div >
     );
 }

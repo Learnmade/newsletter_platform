@@ -86,17 +86,17 @@ function HomeContent() {
                                     New Drop: {courses[0].title.substring(0, 30)}...
                                 </Link>
                             )}
-                            <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 tracking-tight leading-[1.1] mb-6">
+                            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-gray-900 tracking-tight leading-[1.1] mb-6">
                                 Build better software, <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">faster.</span>
                             </h1>
-                            <p className="text-xl text-gray-500 max-w-lg leading-relaxed mb-10">
+                            <p className="text-lg sm:text-xl text-gray-500 max-w-lg leading-relaxed mb-8 lg:mb-10">
                                 Stop watching basic tutorials. Get full-stack, production-ready code breakdowns delivered to your inbox.
                             </p>
-                            <div className="flex flex-wrap gap-4">
-                                <Link href="#courses" className="bg-gray-900 text-white px-8 py-4 rounded-xl font-semibold hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-1">
+                            <div className="flex flex-col sm:flex-row gap-4">
+                                <Link href="#courses" className="bg-gray-900 text-white px-8 py-4 rounded-xl font-semibold hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 text-center">
                                     Start Learning
                                 </Link>
-                                <Link href="#subscribe" className="bg-white text-gray-900 border border-gray-200 px-8 py-4 rounded-xl font-semibold hover:bg-gray-50 transition-all">
+                                <Link href="#subscribe" className="bg-white text-gray-900 border border-gray-200 px-8 py-4 rounded-xl font-semibold hover:bg-gray-50 transition-all text-center">
                                     Join Newsletter
                                 </Link>
                             </div>
@@ -107,7 +107,7 @@ function HomeContent() {
                         </div>
 
                         {/* Hero Graphic / Code Mockup */}
-                        <div className="relative hidden lg:block">
+                        <div className="relative mt-8 lg:mt-0">
                             <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20"></div>
                             <div className="relative bg-gray-900 rounded-2xl border border-gray-800 shadow-2xl overflow-hidden">
                                 <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-800 bg-gray-900/50">
@@ -116,8 +116,8 @@ function HomeContent() {
                                     <div className="w-3 h-3 rounded-full bg-green-500" />
                                     <div className="ml-2 text-xs text-gray-500 font-mono">server.js</div>
                                 </div>
-                                <div className="p-6 overflow-hidden">
-                                    <pre className="font-mono text-sm text-gray-300 leading-relaxed">
+                                <div className="p-4 sm:p-6 overflow-hidden overflow-x-auto">
+                                    <pre className="font-mono text-xs sm:text-sm text-gray-300 leading-relaxed">
                                         <code>
                                             <span className="text-purple-400">import</span> {'{'} NextResponse {'}'} <span className="text-purple-400">from</span> <span className="text-green-400">'next/server'</span>;<br />
                                             <br />
@@ -135,8 +135,8 @@ function HomeContent() {
                                     </pre>
                                 </div>
                             </div>
-                            {/* Floating decorative cards */}
-                            <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-xl border border-gray-100 flex items-center gap-3 animate-bounce-slow">
+                            {/* Floating decorative cards - hidden on very small mobile to prevent clutter */}
+                            <div className="hidden sm:flex absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-xl border border-gray-100 items-center gap-3 animate-bounce-slow">
                                 <div className="p-2 bg-green-100 text-green-600 rounded-lg">
                                     <Zap size={20} />
                                 </div>
