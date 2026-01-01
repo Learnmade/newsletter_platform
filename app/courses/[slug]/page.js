@@ -41,6 +41,19 @@ export default function CourseDetail() {
         setTimeout(() => setCopied(null), 2000);
     };
 
+    const getEmbedUrl = (url) => {
+        if (!url) return '';
+        if (url.includes('youtube.com/watch?v=')) {
+            const videoId = url.split('v=')[1].split('&')[0];
+            return `https://www.youtube.com/embed/${videoId}`;
+        }
+        if (url.includes('youtu.be/')) {
+            const videoId = url.split('youtu.be/')[1].split('?')[0];
+            return `https://www.youtube.com/embed/${videoId}`;
+        }
+        return url;
+    };
+
     if (loading) return <div className="min-h-screen bg-white flex items-center justify-center">Loading...</div>;
     if (!course) return <div className="min-h-screen bg-white flex items-center justify-center">Course not found</div>;
 
@@ -67,7 +80,7 @@ export default function CourseDetail() {
                 {/* Video Section */}
                 <div className="bg-white rounded-2xl overflow-hidden shadow-2xl shadow-indigo-900/10 aspect-video mb-16 border border-gray-100 ring-1 ring-black/5 mx-auto max-w-5xl transform hover:scale-[1.01] transition-transform duration-500 relative">
                     <iframe
-                        src={course.videoUrl}
+                        src={getEmbedUrl(course.videoUrl)}
                         className="absolute top-0 left-0 w-full h-full"
                         title={course.title}
                         frameBorder="0"
@@ -76,8 +89,8 @@ export default function CourseDetail() {
                     />
                 </div>
 
-                {/* Content Tabs */}
-                <div className="border-b border-gray-200 mb-12 sticky top-24 bg-gray-50/80 backdrop-blur-md z-30 pt-4 -mx-4 px-4">
+                {/* Content Tabs - Removed Sticky */}
+                <div className="border-b border-gray-200 mb-12 bg-transparent z-10 pt-4 px-4">
                     <div className="flex justify-center space-x-8">
                         {['explanation', 'structure', 'code'].map((tab) => (
                             <button
