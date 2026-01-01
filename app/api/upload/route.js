@@ -8,8 +8,16 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]/route';
+
 export async function POST(req) {
     try {
+        const session = await getServerSession(authOptions);
+        if (!session || session.user.role !== 'admin') {
+            return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+        }
+
         const formData = await req.formData();
         const file = formData.get('file');
 

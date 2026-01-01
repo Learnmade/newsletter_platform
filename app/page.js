@@ -80,9 +80,15 @@ function HomeContent() {
             <div className="relative overflow-hidden bg-white">
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 via-white to-purple-50/30" />
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 text-center">
-                    <span className="inline-block py-1 px-3 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-sm font-semibold mb-6 animate-fadeIn">
-                        New: Full-Stack Next.js Course Available
-                    </span>
+                    {courses.length > 0 ? (
+                        <Link href={`/courses/${courses[0].slug}`} className="inline-block py-1 px-3 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-sm font-semibold mb-6 animate-fadeIn hover:bg-indigo-100 transition-colors cursor-pointer">
+                            New: {courses[0].title}
+                        </Link>
+                    ) : (
+                        <span className="inline-block py-1 px-3 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-sm font-semibold mb-6 animate-fadeIn">
+                            New: Full-Stack Next.js Course Available
+                        </span>
+                    )}
                     <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 tracking-tight mb-8 leading-tight">
                         Master modern development <br />
                         <span className="text-gradient">one newsletter at a time.</span>
@@ -181,62 +187,60 @@ function HomeContent() {
             </div>
 
             {/* Subscribe Section */}
-            <div id="subscribe" className="relative py-32 overflow-hidden">
-                <div className="absolute inset-0 bg-gray-900">
-                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/50 to-purple-900/50" />
-                </div>
-                <div className="relative max-w-4xl mx-auto px-4 text-center">
-                    <h2 className="text-4xl font-bold mb-6 text-white tracking-tight">Stay ahead of the curve</h2>
-                    <p className="text-gray-300 mb-10 max-w-xl mx-auto text-lg">
-                        Join 15,000+ developers receiving high-quality code breakdowns twice a week. No spam, just code.
-                    </p>
+            <div id="subscribe" className="py-24 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gray-50/50" />
 
-                    <form className="flex flex-col sm:flex-row gap-3 justify-center max-w-lg mx-auto" onSubmit={handleSubscribe}>
-                        {/* HONEYPOT: Hidden field to catch bots */}
-                        <input
-                            type="text"
-                            name="confirm_email_address"
-                            value={honey}
-                            onChange={(e) => setHoney(e.target.value)}
-                            style={{ display: 'none' }}
-                            tabIndex={-1}
-                            autoComplete="off"
-                        />
+                <div className="max-w-5xl mx-auto px-4 relative z-10">
+                    <div className="bg-gray-900 rounded-[2.5rem] p-8 md:p-20 relative overflow-hidden shadow-2xl shadow-indigo-500/20 ring-1 ring-white/10">
+                        {/* Background Effects */}
+                        <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-indigo-500/30 rounded-full blur-3xl opacity-50" />
+                        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl opacity-50" />
 
-                        <input
-                            type="email"
-                            placeholder="Type your email..."
-                            className="px-6 py-4 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full font-medium disabled:opacity-70"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            disabled={submitting}
-                            required
-                        />
-                        <button
-                            disabled={submitting}
-                            className="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-500 transition-all shadow-lg hover:shadow-indigo-500/25 disabled:opacity-70 disabled:cursor-not-allowed min-w-[140px] flex justify-center items-center"
-                        >
-                            {submitting ? (
-                                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            ) : (
-                                'Subscribe'
+                        <div className="relative text-center max-w-2xl mx-auto">
+                            <span className="text-indigo-400 font-bold tracking-wider uppercase text-xs mb-4 block">Newsletter</span>
+                            <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">
+                                Join the inner circle.
+                            </h2>
+                            <p className="text-lg text-gray-400 mb-10 leading-relaxed">
+                                Get exclusive access to new course drops, source code, and developer tips.
+                                Delivered straight to your inbox. No spam, ever.
+                            </p>
+
+                            <form className="flex flex-col sm:flex-row gap-4" onSubmit={handleSubscribe}>
+                                {/* Honeypot */}
+                                <input type="text" name="confirm_email_address" value={honey} onChange={(e) => setHoney(e.target.value)} className="hidden" tabIndex={-1} autoComplete="off" />
+
+                                <input
+                                    type="email"
+                                    placeholder="enter@email.com"
+                                    className="flex-1 px-6 py-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white/10 transition-all w-full font-medium"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    disabled={submitting}
+                                    required
+                                />
+                                <button
+                                    disabled={submitting}
+                                    className="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-500 transition-all shadow-lg hover:shadow-indigo-500/25 disabled:opacity-70 disabled:cursor-not-allowed min-w-[160px] flex justify-center items-center"
+                                >
+                                    {submitting ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Subscribe Now'}
+                                </button>
+                            </form>
+
+                            {message && (
+                                <div className={`mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium animate-fadeIn ${message.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                                    }`}>
+                                    {message.text}
+                                </div>
                             )}
-                        </button>
-                    </form>
 
-                    {message && (
-                        <div className={`mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium animate-fadeIn ${message.type === 'success' ? 'bg-green-500/10 text-green-300' : 'bg-red-500/10 text-red-300'
-                            }`}>
-                            {message.type === 'success' ? (
-                                <div className="w-2 h-2 rounded-full bg-green-400" />
-                            ) : (
-                                <div className="w-2 h-2 rounded-full bg-red-400" />
-                            )}
-                            {message.text}
+                            <div className="mt-10 flex flex-wrap justify-center gap-x-8 gap-y-4 text-sm text-gray-500 font-medium">
+                                <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-green-500 rounded-full" /> Weekly Updates</span>
+                                <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-green-500 rounded-full" /> Source Code</span>
+                                <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 bg-green-500 rounded-full" /> 15k+ Members</span>
+                            </div>
                         </div>
-                    )}
-
-                    <p className="mt-6 text-sm text-gray-500">Unsubscribe at any time.</p>
+                    </div>
                 </div>
             </div>
         </div>
