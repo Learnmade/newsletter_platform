@@ -22,3 +22,33 @@ export async function GET(req, { params }) {
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 }
+
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../../auth/[...nextauth]/route';
+
+export async function PUT(req, { params }) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session || session.user.role !== 'admin') {
+            return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+        }
+
+        await dbConnect();
+        const { slug } = await params;
+        const body = await req.json();
+
+        const updatedCourse = await Course.findOneAndUpdate(
+            { slug },
+            { $set: body },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedCourse) {
+            return NextResponse.json({ success: false, message: 'Course not found' }, { status: 404 });
+        }
+
+        return NextResponse.json({ success: true, data: updatedCourse });
+    } catch (error) {
+        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    }
+}

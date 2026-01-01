@@ -99,9 +99,14 @@ export default function AdminDashboard() {
                                     <td className="px-6 py-4 text-gray-600">{course.views}</td>
                                     <td className="px-6 py-4 text-gray-600">{new Date(course.createdAt).toLocaleDateString()}</td>
                                     <td className="px-6 py-4">
-                                        <Link href={`/courses/${course.slug}`} target="_blank" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                            View
-                                        </Link>
+                                        <div className="flex items-center gap-4">
+                                            <Link href={`/admin/courses/edit/${course.slug}`} className="text-gray-600 hover:text-gray-900 text-sm font-medium">
+                                                Edit
+                                            </Link>
+                                            <Link href={`/courses/${course.slug}`} target="_blank" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                                View
+                                            </Link>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

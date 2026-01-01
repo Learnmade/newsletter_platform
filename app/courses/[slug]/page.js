@@ -50,13 +50,14 @@ export default function CourseDetail() {
 
             <main className="max-w-4xl mx-auto px-4 py-16">
                 {/* Header */}
+                {/* Header */}
                 <div className="mb-12 text-center animate-fadeIn">
-                    <div className="flex justify-center gap-2 mb-6">
+                    <div className="flex flex-wrap justify-center gap-2 mb-6">
                         {course.tags.map(tag => (
                             <span key={tag} className="text-xs font-bold tracking-widest uppercase text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">{tag}</span>
                         ))}
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 leading-tight tracking-tight">{course.title}</h1>
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 leading-tight tracking-tight break-words">{course.title}</h1>
                     <div className="flex justify-center items-center gap-2 text-sm text-gray-400 font-medium">
                         <Clock size={16} />
                         <span>Published on {new Date(course.createdAt).toLocaleDateString()}</span>
@@ -64,10 +65,10 @@ export default function CourseDetail() {
                 </div>
 
                 {/* Video Section */}
-                <div className="bg-white rounded-2xl overflow-hidden shadow-2xl shadow-indigo-900/10 aspect-video mb-16 border border-gray-100 ring-1 ring-black/5 mx-auto max-w-5xl transform hover:scale-[1.01] transition-transform duration-500">
+                <div className="bg-white rounded-2xl overflow-hidden shadow-2xl shadow-indigo-900/10 aspect-video mb-16 border border-gray-100 ring-1 ring-black/5 mx-auto max-w-5xl transform hover:scale-[1.01] transition-transform duration-500 relative">
                     <iframe
                         src={course.videoUrl}
-                        className="w-full h-full"
+                        className="absolute top-0 left-0 w-full h-full"
                         title={course.title}
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
