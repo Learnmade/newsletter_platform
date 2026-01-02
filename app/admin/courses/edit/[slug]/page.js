@@ -14,6 +14,7 @@ export default function EditCourse() {
 
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [uploading, setUploading] = useState(false);
 
     const [formData, setFormData] = useState({
         title: '',
@@ -193,25 +194,79 @@ export default function EditCourse() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-3">
                                     <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Thumbnail</label>
-                                    <div className="group relative">
-                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors">
-                                            <ImageIcon size={18} />
-                                        </div>
-                                        <input
-                                            type="text" // Kept as text input for now, ideally file upload
-                                            name="thumbnail"
-                                            value={formData.thumbnail}
-                                            onChange={handleChange}
-                                            placeholder="Image URL"
-                                            className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm font-medium"
-                                        />
-                                    </div>
-                                    {/* Helper to show image preview if valid URL */}
+
+                                    {/* Image Preview */}
                                     {formData.thumbnail && (
-                                        <div className="relative aspect-video rounded-lg overflow-hidden border border-gray-100 shadow-sm mt-3">
+                                        <div className="relative aspect-video rounded-xl overflow-hidden border border-gray-100 shadow-sm mb-3 group/image">
                                             <img src={formData.thumbnail} alt="Preview" className="object-cover w-full h-full" />
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/image:opacity-100 transition-opacity flex items-center justify-center">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setFormData(prev => ({ ...prev, thumbnail: '' }))}
+                                                    className="bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-sm transform hover:scale-105 transition-transform flex items-center gap-2"
+                                                >
+                                                    <Trash2 size={16} /> Remove Image
+                                                </button>
+                                            </div>
                                         </div>
                                     )}
+
+                                    <div className="flex gap-2">
+                                        <div className="relative group flex-1">
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+                                                <ImageIcon size={18} />
+                                            </div>
+                                            <input
+                                                type="text"
+                                                name="thumbnail"
+                                                value={formData.thumbnail}
+                                                onChange={handleChange}
+                                                placeholder="Image URL or Upload"
+                                                className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm font-medium"
+                                            />
+                                        </div>
+
+                                        <label className={`cursor-pointer px-4 py-3 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 rounded-xl text-indigo-600 transition-colors flex items-center gap-2 font-bold text-sm ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                            {uploading ? (
+                                                <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                                            ) : (
+                                                <ImageIcon size={20} />
+                                            )}
+                                            <span className="hidden sm:inline">{uploading ? 'Uploading...' : 'Upload'}</span>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                disabled={uploading}
+                                                onChange={async (e) => {
+                                                    const file = e.target.files?.[0];
+                                                    if (!file) return;
+
+                                                    setUploading(true);
+                                                    const data = new FormData();
+                                                    data.append('file', file);
+
+                                                    try {
+                                                        const res = await fetch('/api/upload', {
+                                                            method: 'POST',
+                                                            body: data,
+                                                        });
+                                                        const json = await res.json();
+                                                        if (json.success) {
+                                                            setFormData(prev => ({ ...prev, thumbnail: json.url }));
+                                                        } else {
+                                                            alert('Upload failed: ' + (json.error || 'Unknown error'));
+                                                        }
+                                                    } catch (err) {
+                                                        console.error(err);
+                                                        alert('Upload failed');
+                                                    } finally {
+                                                        setUploading(false);
+                                                    }
+                                                }}
+                                            />
+                                        </label>
+                                    </div>
                                 </div>
                                 <div className="space-y-3">
                                     <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Video URL</label>
