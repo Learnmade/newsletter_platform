@@ -2,9 +2,9 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 // Config
-const MONGODB_URI = 'mongodb://localhost:27017/newsletter-platform';
-const ADMIN_EMAIL = 'admin@example.com';
-const ADMIN_PASSWORD = 'admin';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/newsletter-platform';
+const ADMIN_EMAIL = 'learnmadeadmin@gmail.com';
+const ADMIN_PASSWORD = 'learnmadeadmin@200904';
 
 const UserSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
