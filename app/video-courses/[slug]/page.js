@@ -12,18 +12,27 @@ import {
 function getYouTubeEmbedUrl(url) {
     if (!url) return null;
     try {
-        // youtu.be/ID or youtube.com/watch?v=ID or youtube.com/embed/ID
-        const regexps = [
-            /youtu\.be\/([a-zA-Z0-9_-]{11})/,
-            /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
-            /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
-        ];
-        for (const re of regexps) {
-            const m = url.match(re);
-            if (m) return `https://www.youtube.com/embed/${m[1]}?rel=0&modestbranding=1`;
+        let id = null;
+        const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`);
+        if (urlObj.hostname.includes('youtu.be')) {
+            id = urlObj.pathname.slice(1);
+        } else if (urlObj.hostname.includes('youtube.com')) {
+            if (urlObj.pathname === '/watch') {
+                id = urlObj.searchParams.get('v');
+            } else if (urlObj.pathname.startsWith('/embed/')) {
+                id = urlObj.pathname.split('/')[2];
+            } else if (urlObj.pathname.startsWith('/shorts/')) {
+                id = urlObj.pathname.split('/')[2];
+            }
         }
-        return url; // fallback — return as-is
-    } catch { return url; }
+        if (id) {
+            id = id.split('?')[0];
+            return `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`;
+        }
+        return url;
+    } catch { 
+        return url; 
+    }
 }
 
 export default function VideoCoursePage() {

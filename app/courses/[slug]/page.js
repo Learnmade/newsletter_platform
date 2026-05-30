@@ -47,15 +47,28 @@ export default function CourseDetail() {
 
     const getEmbedUrl = (url) => {
         if (!url) return '';
-        if (url.includes('youtube.com/watch?v=')) {
-            const videoId = url.split('v=')[1].split('&')[0];
-            return `https://www.youtube.com/embed/${videoId}`;
+        try {
+            let id = null;
+            const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`);
+            if (urlObj.hostname.includes('youtu.be')) {
+                id = urlObj.pathname.slice(1);
+            } else if (urlObj.hostname.includes('youtube.com')) {
+                if (urlObj.pathname === '/watch') {
+                    id = urlObj.searchParams.get('v');
+                } else if (urlObj.pathname.startsWith('/embed/')) {
+                    id = urlObj.pathname.split('/')[2];
+                } else if (urlObj.pathname.startsWith('/shorts/')) {
+                    id = urlObj.pathname.split('/')[2];
+                }
+            }
+            if (id) {
+                id = id.split('?')[0];
+                return `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`;
+            }
+            return url;
+        } catch {
+            return url;
         }
-        if (url.includes('youtu.be/')) {
-            const videoId = url.split('youtu.be/')[1].split('?')[0];
-            return `https://www.youtube.com/embed/${videoId}`;
-        }
-        return url;
     };
 
     if (loading) return (
