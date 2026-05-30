@@ -33,8 +33,9 @@ const updateSchema = z.object({
 
 export async function GET(req, { params }) {
     try {
+        const { slug } = await params;
         await dbConnect();
-        const course = await VideoCourse.findOne({ slug: params.slug });
+        const course = await VideoCourse.findOne({ slug });
         if (!course) {
             return NextResponse.json({ success: false, error: 'Course not found' }, { status: 404 });
         }
@@ -46,6 +47,7 @@ export async function GET(req, { params }) {
 
 export async function PUT(req, { params }) {
     try {
+        const { slug } = await params;
         const session = await getServerSession(authOptions);
         if (!session || session.user.role !== 'admin') {
             return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
@@ -64,7 +66,7 @@ export async function PUT(req, { params }) {
         }
 
         const course = await VideoCourse.findOneAndUpdate(
-            { slug: params.slug },
+            { slug },
             { $set: validation.data },
             { new: true, runValidators: true }
         );
@@ -81,13 +83,14 @@ export async function PUT(req, { params }) {
 
 export async function DELETE(req, { params }) {
     try {
+        const { slug } = await params;
         const session = await getServerSession(authOptions);
         if (!session || session.user.role !== 'admin') {
             return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
         }
 
         await dbConnect();
-        const course = await VideoCourse.findOneAndDelete({ slug: params.slug });
+        const course = await VideoCourse.findOneAndDelete({ slug });
 
         if (!course) {
             return NextResponse.json({ success: false, error: 'Course not found' }, { status: 404 });
@@ -98,3 +101,4 @@ export async function DELETE(req, { params }) {
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 }
+
