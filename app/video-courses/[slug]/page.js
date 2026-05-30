@@ -6,7 +6,7 @@ import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import {
     PlayCircle, Lock, ChevronDown, ChevronUp, CheckCircle2,
-    Layers, ArrowLeft, Clock, Globe
+    Layers, ArrowLeft, Clock, Globe, BookOpen
 } from 'lucide-react';
 
 function getYouTubeEmbedUrl(url) {
