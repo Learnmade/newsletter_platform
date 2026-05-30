@@ -71,7 +71,10 @@ export default function Navbar() {
                                     </Link>
                                 )}
                                 <div className="flex items-center gap-4 pl-4 border-l border-gray-200">
-                                    <span className="text-sm font-medium text-gray-900">{session.user.email?.split('@')[0]}</span>
+                                    <Link href="/mentorship#my-bookings" className="text-sm font-semibold text-gray-600 hover:text-blue-700 transition-colors">
+                                        My Bookings
+                                    </Link>
+                                    <span className="text-sm font-medium text-gray-900 ml-2">{session.user.email?.split('@')[0]}</span>
                                     <button
                                         onClick={() => signOut({ callbackUrl: '/' })}
                                         className="text-gray-500 hover:text-gray-900 transition-colors"
@@ -137,6 +140,9 @@ export default function Navbar() {
                                             Admin Dashboard
                                         </Link>
                                     )}
+                                    <Link href="/mentorship#my-bookings" className="block px-4 py-3 font-semibold text-gray-700 hover:text-blue-700" onClick={() => setIsMenuOpen(false)}>
+                                        My Bookings
+                                    </Link>
                                 </>
                             ) : (
                                 <>

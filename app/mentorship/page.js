@@ -335,7 +335,7 @@ export default function MentorshipPage() {
 
                 {/* My Bookings Section */}
                 {session && (
-                    <div className="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div id="my-bookings" className="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden scroll-mt-24">
                         <div className="p-8 border-b border-gray-100 bg-gray-50/50">
                             <h2 className="text-xl font-bold text-gray-900">My Bookings</h2>
                             <p className="text-sm text-gray-500 mt-1">View your upcoming sessions and meeting links.</p>
