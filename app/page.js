@@ -11,7 +11,8 @@ function HomeContent() {
     const [videoCourses, setVideoCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const searchParams = useSearchParams();
-    const searchQuery = searchParams.get('search');
+    const rawQuery = searchParams.get('search');
+    const searchQuery = rawQuery?.trim() || null; // treat empty string as null
 
     // Subscription State
     const [email, setEmail] = useState('');
@@ -271,8 +272,17 @@ function HomeContent() {
                             <div className="bg-white p-4 rounded-full w-fit mx-auto mb-4 shadow-sm">
                                 <Search className="text-gray-400" />
                             </div>
-                            <h3 className="text-lg font-semibold text-gray-900">No courses found</h3>
-                            <p className="text-gray-500">We couldn't find anything for "{searchQuery}".</p>
+                            {searchQuery ? (
+                                <>
+                                    <h3 className="text-lg font-semibold text-gray-900">No results found</h3>
+                                    <p className="text-gray-500">We couldn't find anything for "{searchQuery}".</p>
+                                </>
+                            ) : (
+                                <>
+                                    <h3 className="text-lg font-semibold text-gray-900">No courses yet</h3>
+                                    <p className="text-gray-500">Check back soon — new content is on the way!</p>
+                                </>
+                            )}
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
