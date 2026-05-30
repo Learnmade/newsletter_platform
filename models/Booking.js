@@ -37,7 +37,15 @@ const bookingSchema = new mongoose.Schema({
         trim: true,
         default: '',
     },
-    paymentId: {
+    userId: {
+        type: String,
+        required: [true, 'Please provide the user ID'],
+    },
+    razorpayOrderId: {
+        type: String,
+        default: '',
+    },
+    razorpayPaymentId: {
         type: String,
         default: '',
     }

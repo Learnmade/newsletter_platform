@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import Booking from '@/models/Booking';
+import crypto from 'crypto';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -19,8 +22,6 @@ export async function GET(request) {
             return NextResponse.json({ success: false, error: 'Date is required' }, { status: 400 });
         }
 
-        // Fetch all bookings for the specified date to see which slots are taken
-        // We consider any status other than 'cancelled' as occupying the slot
         const bookings = await Booking.find({ 
             date, 
             status: { $ne: 'cancelled' } 
@@ -37,13 +38,29 @@ export async function GET(request) {
 
 export async function POST(request) {
     try {
+        const session = await getServerSession(authOptions);
+        if (!session) {
+            return NextResponse.json({ success: false, error: 'You must be logged in to book a session.' }, { status: 401 });
+        }
+
         await connectDB();
         const body = await request.json();
         
-        const { name, email, date, timeSlot, topic } = body;
+        const { name, email, date, timeSlot, topic, razorpay_order_id, razorpay_payment_id, razorpay_signature } = body;
 
-        if (!name || !email || !date || !timeSlot) {
-            return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
+        if (!name || !email || !date || !timeSlot || !razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+            return NextResponse.json({ success: false, error: 'Missing required fields or payment details' }, { status: 400 });
+        }
+
+        // Verify Razorpay Signature
+        const secret = process.env.RAZORPAY_KEY_SECRET || 'dummy_secret';
+        const expectedSignature = crypto
+            .createHmac('sha256', secret)
+            .update(razorpay_order_id + "|" + razorpay_payment_id)
+            .digest('hex');
+
+        if (expectedSignature !== razorpay_signature) {
+            return NextResponse.json({ success: false, error: 'Invalid payment signature' }, { status: 400 });
         }
 
         // Double check if slot is still available
@@ -54,7 +71,8 @@ export async function POST(request) {
         });
 
         if (existingBooking) {
-            return NextResponse.json({ success: false, error: 'This time slot was just booked by someone else. Please choose another.' }, { status: 409 });
+            // Ideally we'd refund them here, but for now we just return error
+            return NextResponse.json({ success: false, error: 'This time slot was just booked. Please contact support for a refund or reschedule.' }, { status: 409 });
         }
 
         const newBooking = await Booking.create({
@@ -63,13 +81,15 @@ export async function POST(request) {
             date,
             timeSlot,
             topic,
-            status: 'pending' // Defaulting to pending as per plan
+            status: 'confirmed', // Paid via Razorpay
+            userId: session.user.email, // using email as ID since we know it's unique
+            razorpayOrderId: razorpay_order_id,
+            razorpayPaymentId: razorpay_payment_id,
         });
 
         return NextResponse.json({ success: true, data: newBooking }, { status: 201 });
     } catch (error) {
         console.error('Error creating booking:', error);
-        // Handle unique constraint violation manually just in case
         if (error.code === 11000) {
             return NextResponse.json({ success: false, error: 'This time slot is already booked.' }, { status: 409 });
         }
