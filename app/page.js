@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
-import { ArrowRight, Clock, Eye, Code2, Terminal, Zap, Layers, CheckCircle2, Search, PlayCircle, Lock } from 'lucide-react';
+import { ArrowRight, Clock, Eye, Code2, Terminal, Zap, Layers, CheckCircle2, Search, PlayCircle, Lock, Calendar, Users } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
 function HomeContent() {
@@ -168,6 +168,34 @@ function HomeContent() {
                     </div>
                 </div>
             )}
+
+            {/* Mentorship CTA Section */}
+            <div className="py-24 bg-white border-t border-gray-200">
+                <div className="max-w-7xl mx-auto px-6 lg:px-8">
+                    <div className="bg-blue-700 rounded-3xl overflow-hidden shadow-xl flex flex-col md:flex-row items-center">
+                        <div className="p-10 md:p-16 flex-1 text-center md:text-left">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-600 rounded-full text-blue-100 text-xs font-bold tracking-wider uppercase mb-6">
+                                <Users size={14} /> New Feature
+                            </div>
+                            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
+                                Stuck on a problem? Let's pair program.
+                            </h2>
+                            <p className="text-blue-100 text-lg mb-8 max-w-xl mx-auto md:mx-0">
+                                Book a 1-on-1 Google Meet session with an expert. Get code reviews, career guidance, and overcome technical roadblocks faster.
+                            </p>
+                            <Link href="/mentorship" className="inline-flex items-center gap-2 bg-white text-blue-700 px-8 py-4 rounded-xl font-bold hover:bg-gray-50 transition-colors shadow-sm text-lg">
+                                Book a Session <ArrowRight size={18} />
+                            </Link>
+                        </div>
+                        <div className="hidden md:flex flex-1 justify-center p-10">
+                            <div className="w-64 h-64 bg-blue-600 rounded-full flex items-center justify-center opacity-50 relative">
+                                <div className="absolute w-48 h-48 bg-blue-500 rounded-full animate-pulse" />
+                                <Calendar size={80} className="text-white relative z-10" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             {/* Snippet Course Grid */}
             <div id="courses" className="py-20 bg-white border-t border-gray-200">
