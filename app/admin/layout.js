@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import Link from 'next/link';
-import { LayoutDashboard, PlusCircle, PlayCircle, ExternalLink } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, PlayCircle, ExternalLink, Calendar } from 'lucide-react';
 
 export default function AdminLayout({ children }) {
     const { data: session, status } = useSession();
@@ -65,6 +65,11 @@ export default function AdminLayout({ children }) {
                         <PlayCircle size={17} />
                         Video Courses
                         <span className={`ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full ${pathname.startsWith('/admin/video-courses') ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'}`}>NEW</span>
+                    </Link>
+
+                    <Link href="/admin/bookings" className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${pathname.startsWith('/admin/bookings') ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}>
+                        <Calendar size={17} />
+                        1-on-1 Sessions
                     </Link>
                 </nav>
 
