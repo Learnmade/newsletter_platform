@@ -132,43 +132,41 @@ export default function CourseDetail() {
                                 <div className="max-w-none">
                                     <ReactMarkdown
                                         components={{
-                                            h1: ({ children }) => <h1 className="text-3xl font-bold text-gray-900 mb-6 mt-8 pb-4 border-b border-gray-100">{children}</h1>,
+                                            h1: ({ children }) => <h1 className="text-3xl font-bold text-gray-900 mb-6 mt-8 pb-4 border-b border-gray-200">{children}</h1>,
                                             h2: ({ children }) => (
-                                                <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4 flex items-center gap-2 group">
-                                                    <div className="w-1.5 h-6 bg-indigo-500 rounded-full group-hover:h-8 transition-all" />
+                                                <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4 flex items-center gap-2 group border-b border-gray-100 pb-2">
                                                     {children}
                                                 </h2>
                                             ),
                                             h3: ({ children }) => <h3 className="text-xl font-bold text-gray-800 mt-8 mb-3">{children}</h3>,
-                                            p: ({ children }) => <p className="text-gray-600 leading-8 mb-6 text-lg tracking-wide">{children}</p>,
-                                            ul: ({ children }) => <ul className="space-y-3 my-6 pl-4">{children}</ul>,
-                                            ol: ({ children }) => <ol className="space-y-3 my-6 list-decimal list-inside pl-2">{children}</ol>,
+                                            p: ({ children }) => <p className="text-gray-700 leading-relaxed mb-6 text-base">{children}</p>,
+                                            ul: ({ children }) => <ul className="space-y-3 my-6 pl-5 list-disc marker:text-gray-400">{children}</ul>,
+                                            ol: ({ children }) => <ol className="space-y-3 my-6 list-decimal list-inside pl-2 text-gray-700">{children}</ol>,
                                             li: ({ children }) => (
-                                                <li className="flex items-start gap-3 text-gray-700 leading-relaxed group">
-                                                    <span className="mt-2.5 w-1.5 h-1.5 bg-indigo-400 rounded-full shrink-0 group-hover:bg-indigo-600 transition-colors" />
-                                                    <span>{children}</span>
+                                                <li className="text-gray-700 leading-relaxed">
+                                                    {children}
                                                 </li>
                                             ),
                                             blockquote: ({ children }) => (
-                                                <div className="my-8 bg-gradient-to-r from-indigo-50 to-blue-50/50 border-l-4 border-indigo-500 p-6 rounded-r-xl shadow-sm">
-                                                    <div className="flex items-center gap-2 text-indigo-700 font-bold mb-3 uppercase text-xs tracking-wider">
-                                                        <span className="p-1 bg-indigo-100 rounded">NOTE</span>
+                                                <div className="my-8 bg-blue-50 border-l-4 border-blue-600 p-6 rounded-r-lg shadow-sm">
+                                                    <div className="flex items-center gap-2 text-blue-800 font-bold mb-2 uppercase text-xs tracking-wider">
+                                                        <span>NOTE</span>
                                                     </div>
-                                                    <div className="text-indigo-900/80 italic font-medium leading-relaxed">{children}</div>
+                                                    <div className="text-blue-900 italic font-medium leading-relaxed">{children}</div>
                                                 </div>
                                             ),
                                             code: ({ inline, className, children }) => {
                                                 if (inline) {
-                                                    return <code className="bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded-md font-mono text-sm font-bold border border-indigo-100/50">{children}</code>;
+                                                    return <code className="bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded font-mono text-sm font-semibold border border-gray-200">{children}</code>;
                                                 }
                                                 return (
-                                                    <pre className="bg-gray-900 text-gray-50 p-6 rounded-2xl overflow-x-auto my-8 shadow-xl border border-gray-800 font-mono text-sm leading-relaxed">
+                                                    <pre className="bg-gray-900 text-gray-50 p-6 rounded-xl overflow-x-auto my-8 shadow-sm border border-gray-800 font-mono text-sm leading-relaxed">
                                                         {children}
                                                     </pre>
                                                 );
                                             },
                                             a: ({ href, children }) => (
-                                                <a href={href} className="text-indigo-600 font-semibold underline decoration-indigo-200 decoration-2 underline-offset-2 hover:decoration-indigo-500 hover:text-indigo-700 transition-all">
+                                                <a href={href} className="text-blue-600 font-semibold underline decoration-blue-200 decoration-2 underline-offset-2 hover:decoration-blue-500 hover:text-blue-700 transition-all">
                                                     {children}
                                                 </a>
                                             ),
@@ -181,8 +179,8 @@ export default function CourseDetail() {
                             )}
 
                             {activeTab === 'structure' && (
-                                <div className="bg-gray-900 rounded-xl p-6 shadow-xl overflow-x-auto">
-                                    <div className="flex items-center gap-2 mb-4 text-gray-400 border-b border-gray-800 pb-2">
+                                <div className="bg-gray-900 rounded-xl p-6 shadow-sm overflow-x-auto border border-gray-800">
+                                    <div className="flex items-center gap-2 mb-4 text-gray-400 border-b border-gray-800 pb-3">
                                         <FolderTree size={18} />
                                         <span className="text-sm font-bold uppercase tracking-wider">Project Structure</span>
                                     </div>
@@ -196,14 +194,14 @@ export default function CourseDetail() {
                                         <div key={index} className="group">
                                             <div className="flex justify-between items-center mb-3">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+                                                    <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center text-gray-700">
                                                         <FileCode size={16} />
                                                     </div>
                                                     <h3 className="text-base font-bold text-gray-900">{snippet.title}</h3>
                                                 </div>
                                                 <button
                                                     onClick={() => handleCopy(snippet.code, index)}
-                                                    className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-indigo-600 transition-colors bg-white border border-gray-200 hover:border-indigo-100 px-3 py-1.5 rounded-lg shadow-sm"
+                                                    className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 hover:text-blue-700 transition-colors bg-white border border-gray-200 hover:border-blue-200 px-3 py-1.5 rounded-lg shadow-sm"
                                                 >
                                                     {copied === index ? <Check size={14} /> : <Copy size={14} />}
                                                     {copied === index ? 'Copied' : 'Copy Code'}
@@ -224,7 +222,7 @@ export default function CourseDetail() {
                                         </div>
                                     ))}
                                     {course.codeSnippets.length === 0 && (
-                                        <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                                        <div className="text-center py-12 bg-gray-50 rounded-xl border border-gray-200">
                                             <p className="text-gray-500 font-medium">No code snippets available for this issue.</p>
                                         </div>
                                     )}
@@ -234,20 +232,20 @@ export default function CourseDetail() {
                     </div>
 
                     {/* Mobile CTA Card (Visible only on small screens) */}
-                    <div className="lg:hidden mt-8 bg-gradient-to-br from-indigo-600 to-violet-700 rounded-2xl p-6 text-white text-center shadow-lg shadow-indigo-200">
-                        <h3 className="font-bold text-lg mb-2">Want the full source?</h3>
-                        <p className="text-indigo-100 text-sm mb-6">Get access to this project and 50+ others in our GitHub repo.</p>
+                    <div className="lg:hidden mt-8 bg-blue-50 border border-blue-100 rounded-xl p-6 text-center shadow-sm">
+                        <h3 className="font-bold text-gray-900 text-lg mb-2">Want the full source?</h3>
+                        <p className="text-gray-600 text-sm mb-6">Get access to this project and 50+ others in our GitHub repo.</p>
                         {course.repoUrl ? (
                             <a
                                 href={course.repoUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="block w-full bg-white text-indigo-600 font-bold py-3 rounded-xl hover:bg-gray-50 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 duration-200"
+                                className="block w-full bg-blue-700 text-white font-bold py-3 rounded-lg hover:bg-blue-800 transition-colors shadow-sm"
                             >
                                 Access Repository
                             </a>
                         ) : (
-                            <button disabled className="w-full bg-white/50 text-indigo-200 font-bold py-3 rounded-xl cursor-not-allowed">
+                            <button disabled className="w-full bg-gray-100 text-gray-400 font-bold py-3 rounded-lg cursor-not-allowed border border-gray-200">
                                 Repository Unavailable
                             </button>
                         )}
@@ -258,33 +256,33 @@ export default function CourseDetail() {
                         <div>
                             <div className="flex flex-wrap gap-2 mb-4">
                                 {course.tags.map(tag => (
-                                    <span key={tag} className="text-[10px] font-bold tracking-wider uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md border border-indigo-100">
+                                    <span key={tag} className="text-[10px] font-bold tracking-wider uppercase text-gray-600 bg-gray-100 px-2.5 py-1 rounded border border-gray-200">
                                         {tag}
                                     </span>
                                 ))}
                             </div>
                             <h1 className="text-3xl font-bold text-gray-900 leading-tight mb-4">{course.title}</h1>
-                            <div className="flex items-center gap-6 text-sm text-gray-500 font-medium pb-6 border-b border-gray-100">
+                            <div className="flex items-center gap-6 text-sm text-gray-500 font-medium pb-6 border-b border-gray-200">
                                 <span className="flex items-center gap-1.5"><Clock size={16} /> {new Date(course.createdAt).toLocaleDateString()}</span>
                                 <span className="flex items-center gap-1.5"><Eye size={16} /> {course.views || 0} views</span>
                             </div>
                         </div>
 
                         {/* CTA Card */}
-                        <div className="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-2xl p-6 text-white text-center shadow-lg shadow-indigo-200">
-                            <h3 className="font-bold text-lg mb-2">Want the full source?</h3>
-                            <p className="text-indigo-100 text-sm mb-6">Get access to this project and 50+ others in our GitHub repo.</p>
+                        <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 text-center shadow-sm sticky top-24">
+                            <h3 className="font-bold text-gray-900 text-lg mb-2">Want the full source?</h3>
+                            <p className="text-gray-600 text-sm mb-6">Get access to this project and 50+ others in our GitHub repo.</p>
                             {course.repoUrl ? (
                                 <a
                                     href={course.repoUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="block w-full bg-white text-indigo-600 font-bold py-3 rounded-xl hover:bg-gray-50 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 duration-200"
+                                    className="block w-full bg-blue-700 text-white font-bold py-3 rounded-lg hover:bg-blue-800 transition-colors shadow-sm"
                                 >
                                     Access Repository
                                 </a>
                             ) : (
-                                <button disabled className="w-full bg-white/50 text-indigo-200 font-bold py-3 rounded-xl cursor-not-allowed">
+                                <button disabled className="w-full bg-gray-100 text-gray-400 font-bold py-3 rounded-lg cursor-not-allowed border border-gray-200">
                                     Repository Unavailable
                                 </button>
                             )}

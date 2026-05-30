@@ -119,7 +119,7 @@ export default function CreateVideoCoursePage() {
                             <ArrowLeft size={18} />
                         </Link>
                         <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center">
+                            <div className="w-7 h-7 bg-blue-700 rounded-lg flex items-center justify-center">
                                 <PlayCircle size={13} className="text-white" />
                             </div>
                             <span className="font-semibold text-gray-900 text-sm">New Video Course</span>
@@ -133,7 +133,7 @@ export default function CreateVideoCoursePage() {
                                 <button
                                     onClick={() => s < step && setStep(s)}
                                     className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all
-                                        ${step === s ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' :
+                                        ${step === s ? 'bg-blue-700 text-white shadow-sm' :
                                         step > s ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400'}`}
                                 >
                                     {step > s ? <Check size={12} /> : s}
@@ -162,11 +162,11 @@ export default function CreateVideoCoursePage() {
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 space-y-6">
                             {/* Title */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Course Title <span className="text-red-400">*</span></label>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Course Title <span className="text-red-400">*</span></label>
                                 <input
                                     name="title" value={info.title} onChange={handleInfoChange}
                                     placeholder="e.g. Complete React & Next.js Masterclass"
-                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all font-medium text-gray-900 placeholder:text-gray-400"
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all font-medium text-gray-900 placeholder:text-gray-400 shadow-sm"
                                 />
                             </div>
 
@@ -192,14 +192,14 @@ export default function CreateVideoCoursePage() {
 
                             {/* Thumbnail */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Thumbnail <span className="text-red-400">*</span></label>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">Thumbnail <span className="text-red-400">*</span></label>
                                 <div className="relative">
                                     {!info.thumbnail ? (
-                                        <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-xl p-10 cursor-pointer hover:border-indigo-300 hover:bg-indigo-50/30 transition-all group">
-                                            <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center mb-3 group-hover:bg-indigo-100 transition-colors">
-                                                {uploading ? <Loader2 size={22} className="animate-spin text-indigo-500" /> : <ImageIcon size={22} className="text-indigo-400" />}
+                                        <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-10 cursor-pointer hover:border-blue-300 hover:bg-blue-50/30 transition-all group">
+                                            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-3 group-hover:bg-blue-100 transition-colors">
+                                                {uploading ? <Loader2 size={22} className="animate-spin text-blue-600" /> : <ImageIcon size={22} className="text-blue-500" />}
                                             </div>
-                                            <p className="text-sm font-semibold text-gray-700">{uploading ? 'Uploading...' : 'Click to upload thumbnail'}</p>
+                                            <p className="text-sm font-bold text-gray-700">{uploading ? 'Uploading...' : 'Click to upload thumbnail'}</p>
                                             <p className="text-xs text-gray-400 mt-1">PNG, JPG, WebP — 16:9 recommended</p>
                                             <input type="file" accept="image/*" className="hidden" onChange={handleThumbnailUpload} disabled={uploading} />
                                         </label>
@@ -283,7 +283,7 @@ export default function CreateVideoCoursePage() {
                             </div>
                             <button
                                 onClick={addChapter}
-                                className="flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors"
+                                className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors"
                             >
                                 <Plus size={16} /> Add Chapter
                             </button>
@@ -464,7 +464,7 @@ export default function CreateVideoCoursePage() {
                     {step < 3 ? (
                         <button
                             onClick={() => setStep(s => s + 1)}
-                            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-semibold text-sm shadow-lg shadow-indigo-200 transition-all"
+                            className="flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-sm transition-all"
                         >
                             Next Step <ArrowRight size={16} />
                         </button>
@@ -473,7 +473,7 @@ export default function CreateVideoCoursePage() {
                             onClick={handleSubmit}
                             disabled={loading}
                             id="publish-video-course-btn"
-                            className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white px-8 py-3 rounded-xl font-semibold text-sm shadow-lg shadow-indigo-200 transition-all disabled:opacity-70"
+                            className="flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white px-8 py-3 rounded-xl font-bold text-sm shadow-sm transition-all disabled:opacity-70"
                         >
                             {loading ? <Loader2 size={16} className="animate-spin" /> : (info.status === 'published' ? <Globe size={16} /> : <Lock size={16} />)}
                             {loading ? 'Publishing...' : (info.status === 'published' ? 'Publish Course' : 'Save as Draft')}

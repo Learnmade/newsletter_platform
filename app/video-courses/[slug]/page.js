@@ -88,30 +88,29 @@ export default function VideoCoursePage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-950">
+        <div className="min-h-screen bg-white">
             <Navbar />
 
-            <div className="pt-16">
+            <div className="pt-16 flex flex-col h-screen">
                 {/* Top bar */}
-                <div className="bg-gray-900 border-b border-white/5 px-6 py-3 flex items-center gap-4">
-                    <Link href="/video-courses" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm">
-                        <ArrowLeft size={15} /> All Courses
+                <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-4 shrink-0">
+                    <Link href="/video-courses" className="flex items-center gap-2 text-gray-500 hover:text-blue-700 transition-colors text-sm font-medium">
+                        <ArrowLeft size={16} /> All Courses
                     </Link>
-                    <span className="text-gray-700">/</span>
-                    <span className="text-gray-300 text-sm font-medium truncate">{course.title}</span>
+                    <span className="text-gray-300">|</span>
+                    <span className="text-gray-900 text-sm font-bold truncate">{course.title}</span>
                     <div className="ml-auto flex items-center gap-2">
-                        <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${course.isPaid ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}`}>
+                        <span className={`text-[11px] font-bold px-2.5 py-1 rounded shadow-sm ${course.isPaid ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-green-100 text-green-800 border border-green-200'}`}>
                             {course.isPaid ? <><Lock size={10} className="inline mr-1" />Paid</> : <><Globe size={10} className="inline mr-1" />Free</>}
                         </span>
-                        <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white/10 text-gray-300">{course.level}</span>
                     </div>
                 </div>
 
-                <div className="flex h-[calc(100vh-112px)]">
-                    {/* Video Player */}
-                    <div className="flex-1 flex flex-col bg-black overflow-y-auto">
+                <div className="flex flex-1 overflow-hidden">
+                    {/* Video Player & Info Area */}
+                    <div className="flex-1 flex flex-col overflow-y-auto bg-gray-50">
                         {/* Video */}
-                        <div className="relative w-full bg-black" style={{ paddingBottom: '56.25%' }}>
+                        <div className="relative w-full bg-black shadow-inner" style={{ paddingBottom: '56.25%' }}>
                             {currentEp ? (
                                 <iframe
                                     key={currentEp.videoUrl}
@@ -125,75 +124,80 @@ export default function VideoCoursePage() {
                                 <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
                                     <div className="text-center">
                                         <PlayCircle className="text-gray-600 mx-auto mb-3" size={48} />
-                                        <p className="text-gray-500 text-sm">Select an episode to start watching</p>
+                                        <p className="text-gray-400 text-sm">Select an episode to start watching</p>
                                     </div>
                                 </div>
                             )}
                         </div>
 
-                        {/* Episode Info */}
-                        {currentEp && (
-                            <div className="bg-gray-900 px-8 py-6 border-t border-white/5">
-                                <div className="flex items-start justify-between gap-4">
-                                    <div>
-                                        <p className="text-xs text-indigo-400 font-semibold uppercase tracking-wider mb-1">
-                                            Chapter {activeEpisode.ci + 1} · Episode {activeEpisode.ei + 1}
-                                        </p>
-                                        <h2 className="text-xl font-bold text-white">{currentEp.title}</h2>
-                                        {currentEp.duration && (
-                                            <p className="text-sm text-gray-400 mt-1 flex items-center gap-1.5">
-                                                <Clock size={13} /> {currentEp.duration}
+                        <div className="max-w-5xl mx-auto w-full px-8 py-8 space-y-8">
+                            {/* Episode Info */}
+                            {currentEp && (
+                                <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div>
+                                            <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-2">
+                                                Chapter {activeEpisode.ci + 1} · Lesson {activeEpisode.ei + 1}
                                             </p>
+                                            <h2 className="text-2xl font-bold text-gray-900">{currentEp.title}</h2>
+                                            {currentEp.duration && (
+                                                <p className="text-sm text-gray-500 mt-2 flex items-center gap-1.5">
+                                                    <Clock size={14} /> {currentEp.duration}
+                                                </p>
+                                            )}
+                                        </div>
+                                        {currentEp.isFree && (
+                                            <span className="shrink-0 text-xs font-bold px-3 py-1.5 bg-green-100 text-green-800 border border-green-200 rounded">
+                                                Free Preview
+                                            </span>
                                         )}
                                     </div>
-                                    {currentEp.isFree && (
-                                        <span className="shrink-0 text-xs font-bold px-2.5 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full">
-                                            Free Preview
-                                        </span>
-                                    )}
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {/* Course Info (below video) */}
-                        <div className="bg-gray-900 px-8 py-8 border-t border-white/5">
-                            <h3 className="text-lg font-bold text-white mb-3">About this course</h3>
-                            <p className="text-gray-400 leading-relaxed text-sm">{course.description}</p>
-                            <div className="flex flex-wrap gap-2 mt-5">
-                                {course.tags?.map(t => (
-                                    <span key={t} className="text-xs px-3 py-1 bg-white/5 text-gray-400 rounded-full border border-white/10">{t}</span>
-                                ))}
-                            </div>
-                            <div className="flex items-center gap-6 mt-6 text-sm text-gray-500">
-                                <span className="flex items-center gap-1.5"><Layers size={14} /> {course.chapters?.length} chapters</span>
-                                <span className="flex items-center gap-1.5"><PlayCircle size={14} /> {totalEpisodes} episodes</span>
+                            {/* Course Info */}
+                            <div className="bg-white rounded-xl p-8 border border-gray-200 shadow-sm">
+                                <h3 className="text-xl font-bold text-gray-900 mb-4 pb-4 border-b border-gray-100">About this course</h3>
+                                <p className="text-gray-700 leading-relaxed">{course.description}</p>
+                                
+                                <div className="flex flex-wrap gap-2 mt-6">
+                                    {course.tags?.map(t => (
+                                        <span key={t} className="text-xs font-semibold px-3 py-1 bg-gray-100 text-gray-700 rounded-md border border-gray-200">{t}</span>
+                                    ))}
+                                </div>
+                                
+                                <div className="flex items-center gap-8 mt-8 pt-6 border-t border-gray-100 text-sm text-gray-600 font-medium">
+                                    <span className="flex items-center gap-2"><Layers size={16} className="text-blue-600" /> {course.chapters?.length} Modules</span>
+                                    <span className="flex items-center gap-2"><PlayCircle size={16} className="text-blue-600" /> {totalEpisodes} Lessons</span>
+                                    <span className="flex items-center gap-2"><BookOpen size={16} className="text-blue-600" /> English</span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Curriculum Sidebar */}
-                    <div className="w-80 bg-gray-900 border-l border-white/5 flex flex-col shrink-0 overflow-y-auto">
-                        <div className="p-5 border-b border-white/5">
-                            <h3 className="font-bold text-white text-sm">Course Content</h3>
-                            <p className="text-xs text-gray-500 mt-0.5">{course.chapters?.length} chapters · {totalEpisodes} episodes</p>
+                    <div className="w-[350px] bg-white border-l border-gray-200 flex flex-col shrink-0 overflow-y-auto shadow-xl z-10">
+                        <div className="p-6 border-b border-gray-200 bg-gray-50/50 sticky top-0 z-10 backdrop-blur-sm">
+                            <h3 className="font-bold text-gray-900 text-base">Course Curriculum</h3>
+                            <p className="text-xs text-gray-500 mt-1">{course.chapters?.length} modules • {totalEpisodes} lessons</p>
                         </div>
 
                         <div className="flex-1">
                             {course.chapters?.map((chapter, ci) => (
-                                <div key={ci} className="border-b border-white/5">
+                                <div key={ci} className="border-b border-gray-200">
                                     {/* Chapter header */}
                                     <button
                                         onClick={() => toggleChapter(ci)}
-                                        className="w-full flex items-center gap-3 px-5 py-4 hover:bg-white/5 transition-colors text-left"
+                                        className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 transition-colors text-left bg-white"
                                     >
-                                        <div className="w-6 h-6 bg-indigo-500/20 text-indigo-400 rounded flex items-center justify-center text-[10px] font-bold shrink-0">
+                                        <div className="w-8 h-8 bg-gray-100 text-gray-700 rounded flex items-center justify-center text-sm font-bold shrink-0">
                                             {ci + 1}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-semibold text-gray-200 truncate">{chapter.title || `Chapter ${ci + 1}`}</p>
-                                            <p className="text-[11px] text-gray-500 mt-0.5">{chapter.episodes?.length} episodes</p>
+                                            <p className="text-sm font-bold text-gray-900 truncate">{chapter.title || `Module ${ci + 1}`}</p>
+                                            <p className="text-[11px] text-gray-500 mt-1 font-medium">{chapter.episodes?.length} lessons</p>
                                         </div>
-                                        {expandedChapters[ci] ? <ChevronUp size={14} className="text-gray-500 shrink-0" /> : <ChevronDown size={14} className="text-gray-500 shrink-0" />}
+                                        {expandedChapters[ci] ? <ChevronUp size={16} className="text-gray-400 shrink-0" /> : <ChevronDown size={16} className="text-gray-400 shrink-0" />}
                                     </button>
 
                                     {/* Episodes */}
@@ -203,22 +207,22 @@ export default function VideoCoursePage() {
                                             <button
                                                 key={ei}
                                                 onClick={() => setActiveEpisode({ ci, ei })}
-                                                className={`w-full flex items-center gap-3 px-5 py-3 hover:bg-white/5 transition-colors text-left ${isActive ? 'bg-indigo-500/10 border-l-2 border-indigo-500' : ''}`}
+                                                className={`w-full flex items-start gap-4 px-6 py-4 hover:bg-gray-50 transition-colors text-left border-t border-gray-100 ${isActive ? 'bg-blue-50/50 border-l-4 border-l-blue-600 pl-5' : ''}`}
                                             >
-                                                <div className="shrink-0">
+                                                <div className="shrink-0 mt-0.5">
                                                     {isActive
-                                                        ? <div className="w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center"><PlayCircle size={10} className="text-white" /></div>
-                                                        : <div className="w-5 h-5 bg-white/10 rounded-full flex items-center justify-center text-[9px] font-bold text-gray-500">{ei + 1}</div>
+                                                        ? <PlayCircle size={16} className="text-blue-700" />
+                                                        : <PlayCircle size={16} className="text-gray-400" />
                                                     }
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <p className={`text-xs font-medium truncate ${isActive ? 'text-indigo-300' : 'text-gray-400'}`}>{ep.title}</p>
-                                                    <div className="flex items-center gap-2 mt-0.5">
-                                                        {ep.duration && <span className="text-[10px] text-gray-600 flex items-center gap-0.5"><Clock size={9} />{ep.duration}</span>}
-                                                        {ep.isFree && <span className="text-[9px] font-bold text-emerald-500">FREE</span>}
+                                                    <p className={`text-sm leading-snug ${isActive ? 'font-bold text-blue-900' : 'font-medium text-gray-700'}`}>{ep.title}</p>
+                                                    <div className="flex items-center gap-3 mt-1.5">
+                                                        {ep.duration && <span className="text-[11px] text-gray-500 font-medium flex items-center gap-1"><Clock size={10} />{ep.duration}</span>}
+                                                        {ep.isFree && <span className="text-[10px] font-bold text-green-700 uppercase tracking-wide">Free</span>}
                                                     </div>
                                                 </div>
-                                                {isActive && <CheckCircle2 size={14} className="text-indigo-400 shrink-0" />}
+                                                {isActive && <CheckCircle2 size={16} className="text-blue-600 shrink-0 mt-0.5" />}
                                             </button>
                                         );
                                     })}

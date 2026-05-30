@@ -123,9 +123,9 @@ export default function CreateCourse() {
                             </p>
                         </div>
                         <div className="lg:col-span-2 space-y-6">
-                            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+                            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 space-y-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Course Title</label>
+                                    <label className="block text-sm font-bold text-gray-700 mb-2">Course Title</label>
                                     <input
                                         type="text"
                                         name="title"
@@ -133,42 +133,42 @@ export default function CreateCourse() {
                                         value={formData.title}
                                         onChange={handleChange}
                                         placeholder="e.g. Master Next.js 14"
-                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all font-medium text-gray-900 placeholder:text-gray-400"
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all font-medium text-gray-900 placeholder:text-gray-400 shadow-sm"
                                     />
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Slug</label>
+                                        <label className="block text-sm font-bold text-gray-700 mb-2">Slug</label>
                                         <input
                                             type="text"
                                             name="slug"
                                             value={formData.slug}
                                             onChange={handleChange}
-                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm font-mono text-gray-600"
+                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all text-sm font-mono text-gray-600 shadow-sm"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+                                        <label className="block text-sm font-bold text-gray-700 mb-2">Tags</label>
                                         <input
                                             type="text"
                                             name="tags"
                                             value={formData.tags}
                                             onChange={handleChange}
                                             placeholder="React, Backend"
-                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm"
+                                            className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all text-sm shadow-sm"
                                         />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Thumbnail</label>
+                                    <label className="block text-sm font-bold text-gray-700 mb-2">Thumbnail</label>
                                     <div className="relative group">
-                                        <div className={`border-2 border-dashed border-gray-200 rounded-xl p-8 hover:bg-gray-50 transition-colors text-center ${formData.thumbnail ? 'hidden' : 'block'}`}>
-                                            <div className="w-12 h-12 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <div className={`border-2 border-dashed border-gray-300 rounded-xl p-8 hover:bg-gray-50 transition-colors text-center ${formData.thumbnail ? 'hidden' : 'block'}`}>
+                                            <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                                                 <ImageIcon size={24} />
                                             </div>
-                                            <p className="text-sm text-gray-600 font-medium">Click to upload image</p>
+                                            <p className="text-sm text-gray-600 font-bold">Click to upload image</p>
                                             <p className="text-xs text-gray-400 mt-1">SVG, PNG, JPG or GIF (max. 2MB)</p>
                                             <input
                                                 type="file"
@@ -205,12 +205,12 @@ export default function CreateCourse() {
 
                                         {uploading && (
                                             <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-xl z-10">
-                                                <Loader2 className="animate-spin text-indigo-500" />
+                                                <Loader2 className="animate-spin text-blue-600" />
                                             </div>
                                         )}
 
                                         {formData.thumbnail && (
-                                            <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-sm border border-gray-100 group">
+                                            <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-sm border border-gray-200 group">
                                                 <img src={formData.thumbnail} alt="Thumbnail" className="w-full h-full object-cover" />
                                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                                     <button
@@ -234,17 +234,17 @@ export default function CreateCourse() {
                     {/* Section 2: Content */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                         <div className="lg:col-span-1">
-                            <h2 className="text-lg font-semibold text-gray-900 mb-2">Content & Media</h2>
+                            <h2 className="text-lg font-bold text-gray-900 mb-2">Content & Media</h2>
                             <p className="text-sm text-gray-500 leading-relaxed">
                                 The meat of the course. Add your video URL and the written breakdown.
                             </p>
                         </div>
                         <div className="lg:col-span-2 space-y-6">
-                            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+                            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 space-y-6">
                                 <div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Video Embed URL</label>
+                                            <label className="block text-sm font-bold text-gray-700 mb-2">Video Embed URL</label>
                                             <div className="relative">
                                                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                                                     <Video size={18} />
@@ -255,12 +255,12 @@ export default function CreateCourse() {
                                                     value={formData.videoUrl}
                                                     onChange={handleChange}
                                                     placeholder="YouTube URL"
-                                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm font-medium"
+                                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all text-sm font-medium shadow-sm"
                                                 />
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">GitHub Repo URL</label>
+                                            <label className="block text-sm font-bold text-gray-700 mb-2">GitHub Repo URL</label>
                                             <div className="relative">
                                                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                                                     <Code size={18} />
@@ -271,7 +271,7 @@ export default function CreateCourse() {
                                                     value={formData.repoUrl}
                                                     onChange={handleChange}
                                                     placeholder="GitHub Repo URL"
-                                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm font-medium"
+                                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all text-sm font-medium shadow-sm"
                                                 />
                                             </div>
                                         </div>
@@ -279,25 +279,25 @@ export default function CreateCourse() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Description / Article</label>
+                                    <label className="block text-sm font-bold text-gray-700 mb-2">Description / Article</label>
                                     <textarea
                                         name="description"
                                         rows={12}
                                         value={formData.description}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm leading-relaxed"
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all text-sm leading-relaxed shadow-sm"
                                         placeholder="Write your deep dive here..."
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">File Structure</label>
+                                    <label className="block text-sm font-bold text-gray-700 mb-2">File Structure</label>
                                     <textarea
                                         name="fileStructure"
                                         rows={8}
                                         value={formData.fileStructure}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-3 bg-gray-900 border border-gray-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-mono text-gray-300 placeholder:text-gray-600"
+                                        className="w-full px-4 py-3 bg-gray-900 border border-gray-800 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none transition-all text-sm font-mono text-gray-300 placeholder:text-gray-600 shadow-sm"
                                         placeholder={".\n├── app/\n│   ├── page.js\n│   └── layout.js"}
                                     />
                                 </div>
@@ -310,40 +310,40 @@ export default function CreateCourse() {
                     {/* Section 3: Code */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                         <div className="lg:col-span-1">
-                            <h2 className="text-lg font-semibold text-gray-900 mb-2">Code Snippets</h2>
+                            <h2 className="text-lg font-bold text-gray-900 mb-2">Code Snippets</h2>
                             <p className="text-sm text-gray-500 leading-relaxed">
                                 Share the exact code used in the video so users can copy-paste.
                             </p>
                             <button
                                 type="button"
                                 onClick={addSnippet}
-                                className="mt-4 text-sm font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+                                className="mt-4 text-sm font-bold text-blue-700 hover:text-blue-800 flex items-center gap-1"
                             >
                                 <Plus size={16} /> Add Another Snippet
                             </button>
                         </div>
                         <div className="lg:col-span-2 space-y-6">
                             {snippets.map((snippet, index) => (
-                                <div key={index} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4 group hover:border-indigo-100 transition-colors">
+                                <div key={index} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 space-y-4 group hover:border-blue-200 transition-colors">
                                     <div className="flex items-center gap-4">
                                         <input
                                             type="text"
                                             placeholder="Filename (e.g. page.js)"
                                             value={snippet.title}
                                             onChange={(e) => handleSnippetChange(index, 'title', e.target.value)}
-                                            className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-medium"
+                                            className="flex-1 px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-600 outline-none text-sm font-bold shadow-sm"
                                         />
                                         <input
                                             type="text"
                                             placeholder="Language"
                                             value={snippet.language}
                                             onChange={(e) => handleSnippetChange(index, 'language', e.target.value)}
-                                            className="w-32 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-medium"
+                                            className="w-32 px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-600 outline-none text-sm font-bold shadow-sm"
                                         />
                                         <button
                                             type="button"
                                             onClick={() => removeSnippet(index)}
-                                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                                         >
                                             <Trash2 size={18} />
                                         </button>
@@ -354,7 +354,7 @@ export default function CreateCourse() {
                                             value={snippet.code}
                                             onChange={(e) => handleSnippetChange(index, 'code', e.target.value)}
                                             rows={8}
-                                            className="w-full px-4 py-4 bg-gray-900 text-gray-100 rounded-xl font-mono text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                                            className="w-full px-4 py-4 bg-gray-900 text-gray-100 rounded-xl font-mono text-sm focus:ring-2 focus:ring-blue-600 outline-none shadow-sm"
                                             placeholder="// Paste code..."
                                         />
                                     </div>

@@ -12,7 +12,7 @@
     }
 
     ::selection {
-        @apply bg-indigo-500 text-white;
+        @apply bg-blue-600 text-white;
     }
 }
 
@@ -26,7 +26,11 @@
         scrollbar-width: none;
     }
 
-    .text-gradient {
-        @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600;
+    .text-brand-blue {
+        @apply text-blue-700;
+    }
+    
+    .bg-brand-blue {
+        @apply bg-blue-700 hover:bg-blue-800 text-white transition-colors;
     }
 }

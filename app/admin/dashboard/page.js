@@ -112,7 +112,7 @@ export default function AdminDashboard() {
                 </div>
                 <Link
                     href="/admin/courses/create"
-                    className="group bg-gray-900 hover:bg-black text-white px-5 py-3 rounded-xl font-medium shadow-lg shadow-gray-200 transition-all flex items-center gap-2 transform hover:scale-105"
+                    className="group bg-blue-700 hover:bg-blue-800 text-white px-5 py-3 rounded-xl font-medium shadow-sm transition-all flex items-center gap-2 transform hover:-translate-y-0.5"
                 >
                     <PlusCircle size={20} />
                     <span>Create Course</span>
@@ -348,7 +348,7 @@ function SubscribersTable({ subscribers, onDelete }) {
                         <tr key={sub._id} className="hover:bg-gray-50/50 transition-colors group">
                             <td className="px-6 py-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-indigo-500 flex items-center justify-center text-white text-xs font-bold">
+                                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">
                                         {sub.email[0].toUpperCase()}
                                     </div>
                                     <span className="text-sm font-medium text-gray-900">{sub.email}</span>
