@@ -33,15 +33,20 @@ export const metadata = {
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import { Suspense } from "react";
 
+import Footer from "@/components/Footer";
+
 export default function RootLayout({ children }) {
     return (
         <html lang="en">
-            <body className={`${inter.className} antialiased text-gray-900 bg-white`}>
+            <body className={`${inter.className} antialiased text-gray-900 bg-white flex flex-col min-h-screen`}>
                 <AuthProvider>
                     <Suspense fallback={null}>
                         <AnalyticsTracker />
                     </Suspense>
-                    {children}
+                    <main className="flex-1">
+                        {children}
+                    </main>
+                    <Footer />
                 </AuthProvider>
             </body>
         </html>
