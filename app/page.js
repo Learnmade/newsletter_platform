@@ -3,11 +3,12 @@
 import { useState, useEffect, Suspense } from 'react';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
-import { ArrowRight, Clock, Eye, Code2, Terminal, Zap, Layers, CheckCircle2, Search } from 'lucide-react';
+import { ArrowRight, Clock, Eye, Code2, Terminal, Zap, Layers, CheckCircle2, Search, PlayCircle, Lock } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
 function HomeContent() {
     const [courses, setCourses] = useState([]);
+    const [videoCourses, setVideoCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const searchParams = useSearchParams();
     const searchQuery = searchParams.get('search');
@@ -20,6 +21,9 @@ function HomeContent() {
 
     useEffect(() => {
         fetchCourses();
+        fetch('/api/video-courses?status=published')
+            .then(r => r.json())
+            .then(d => { if (d.success) setVideoCourses(d.data.slice(0, 3)); });
     }, [searchQuery]);
 
     const fetchCourses = async () => {
@@ -184,6 +188,58 @@ function HomeContent() {
                     </div>
                 </div>
             </div>
+
+            {/* Video Courses Section */}
+            {videoCourses.length > 0 && (
+                <div className="py-24 bg-gray-950">
+                    <div className="max-w-7xl mx-auto px-6 lg:px-8">
+                        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+                            <div>
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="w-7 h-7 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center">
+                                        <PlayCircle size={14} className="text-white" />
+                                    </div>
+                                    <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Video Courses</span>
+                                </div>
+                                <h2 className="text-3xl font-bold text-white mb-2">Structured Video Courses</h2>
+                                <p className="text-gray-400">Full courses with chapters, episodes, and hands-on projects.</p>
+                            </div>
+                            <Link href="/video-courses" className="flex items-center gap-1 text-sm font-semibold text-indigo-400 hover:text-indigo-300 whitespace-nowrap">
+                                View All Courses <ArrowRight size={16} />
+                            </Link>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {videoCourses.map(course => (
+                                <Link key={course._id} href={`/video-courses/${course.slug}`}
+                                    className="group bg-gray-900 rounded-2xl border border-white/5 hover:border-indigo-500/30 transition-all duration-300 hover:-translate-y-1 overflow-hidden flex flex-col">
+                                    <div className="relative aspect-video bg-gray-800 overflow-hidden">
+                                        {course.thumbnail
+                                            ? <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                            : <div className="w-full h-full flex items-center justify-center"><PlayCircle className="text-gray-600" size={40} /></div>}
+                                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center"><PlayCircle className="text-indigo-600" size={22} /></div>
+                                        </div>
+                                        <div className="absolute top-3 left-3">
+                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${course.isPaid ? 'bg-amber-500 text-white' : 'bg-emerald-500 text-white'}`}>
+                                                {course.isPaid ? 'Paid' : 'Free'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="p-5 flex-1 flex flex-col">
+                                        <h3 className="font-bold text-white text-sm mb-2 line-clamp-2 group-hover:text-indigo-300 transition-colors">{course.title}</h3>
+                                        <p className="text-xs text-gray-500 line-clamp-2 mb-4 flex-1">{course.description}</p>
+                                        <div className="flex items-center gap-3 text-xs text-gray-600 pt-3 border-t border-white/5">
+                                            <span className="flex items-center gap-1"><Layers size={11} />{course.chapters?.length || 0} ch</span>
+                                            <span className="flex items-center gap-1"><PlayCircle size={11} />{course.chapters?.reduce((a,c)=>a+(c.episodes?.length||0),0)} ep</span>
+                                            <span className="ml-auto text-indigo-400 font-semibold">Watch →</span>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Course Grid */}
             <div id="courses" className="py-24 bg-white">

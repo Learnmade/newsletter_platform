@@ -27,6 +27,7 @@ const updateSchema = z.object({
     tags: z.array(z.string()).optional(),
     level: z.enum(['Beginner', 'Intermediate', 'Advanced']).optional(),
     status: z.enum(['draft', 'published']).optional(),
+    isPaid: z.boolean().optional(),
     chapters: z.array(chapterSchema).optional(),
 });
 

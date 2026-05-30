@@ -27,6 +27,7 @@ const videoCourseSchema = z.object({
     tags: z.array(z.string()).default([]),
     level: z.enum(['Beginner', 'Intermediate', 'Advanced']).default('Beginner'),
     status: z.enum(['draft', 'published']).default('draft'),
+    isPaid: z.boolean().default(false),
     chapters: z.array(chapterSchema).default([]),
 });
 

@@ -22,7 +22,7 @@ export default function CreateVideoCoursePage() {
 
     const [info, setInfo] = useState({
         title: '', slug: '', thumbnail: '', description: '',
-        tags: '', level: 'Beginner', status: 'draft',
+        tags: '', level: 'Beginner', status: 'draft', isPaid: false,
     });
     const [chapters, setChapters] = useState([defaultChapter()]);
 
@@ -227,7 +227,7 @@ export default function CreateVideoCoursePage() {
                                 />
                             </div>
 
-                            {/* Tags + Status */}
+                            {/* Tags + Status + isPaid */}
                             <div className="grid grid-cols-2 gap-5">
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Tags <span className="text-gray-400 font-normal">(comma separated)</span></label>
@@ -247,6 +247,25 @@ export default function CreateVideoCoursePage() {
                                         <option value="published">Published</option>
                                     </select>
                                 </div>
+                            </div>
+
+                            {/* Pricing */}
+                            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
+                                <div>
+                                    <p className="text-sm font-semibold text-gray-800">Paid Course</p>
+                                    <p className="text-xs text-gray-500 mt-0.5">Free courses are accessible to everyone. Paid courses show a lock badge.</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setInfo(prev => ({ ...prev, isPaid: !prev.isPaid }))}
+                                    className={`relative w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none ${
+                                        info.isPaid ? 'bg-amber-500' : 'bg-gray-200'
+                                    }`}
+                                >
+                                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${
+                                        info.isPaid ? 'translate-x-6' : 'translate-x-0'
+                                    }`} />
+                                </button>
                             </div>
                         </div>
                     </div>

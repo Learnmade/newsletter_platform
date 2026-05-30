@@ -47,6 +47,10 @@ const VideoCourseSchema = new mongoose.Schema({
         enum: ['draft', 'published'],
         default: 'draft',
     },
+    isPaid: {
+        type: Boolean,
+        default: false,
+    },
     chapters: [ChapterSchema],
     views: {
         type: Number,
