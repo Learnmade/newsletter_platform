@@ -39,6 +39,12 @@ const LiveStreamSchema = new mongoose.Schema({
         type: [String],
         default: [],
     },
+    reactions: {
+        fire: { type: Number, default: 0 },
+        heart: { type: Number, default: 0 },
+        clap: { type: Number, default: 0 },
+        idea: { type: Number, default: 0 },
+    },
 }, { timestamps: true });
 
 export default mongoose.models.LiveStream || mongoose.model('LiveStream', LiveStreamSchema);
