@@ -7,8 +7,8 @@ import { PlayCircle } from 'lucide-react';
 export default function Footer() {
     const pathname = usePathname();
 
-    // Do not show footer in admin pages
-    if (pathname?.startsWith('/admin')) {
+    // Do not show footer in admin or live pages
+    if (pathname?.startsWith('/admin') || pathname?.startsWith('/live')) {
         return null;
     }
 

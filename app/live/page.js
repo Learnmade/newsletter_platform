@@ -3,11 +3,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import Navbar from '@/components/Navbar';
 import {
     Radio, Eye, Calendar, Clock, ThumbsUp,
     Send, ChevronRight, ArrowLeft, Share2, Bell,
-    WifiOff, PlayCircle, MessageSquare, Wifi, Users, Star
+    WifiOff, PlayCircle, MessageSquare, Wifi, Users, Star, LogIn
 } from 'lucide-react';
 
 // ─── Countdown Timer ─────────────────────────────────────────────────────────
@@ -217,7 +216,6 @@ export default function LivePage() {
     // ── Toggle Follow Status ───────────────────────────────────
     const toggleFollow = async () => {
         if (!session) {
-            alert('Please login to follow channels.');
             window.location.href = '/login?callbackUrl=/live';
             return;
         }
@@ -246,13 +244,43 @@ export default function LivePage() {
         }
     };
 
+    // ─── Minimal Header ──────────────────────────────────────────
+    const MinimalHeader = () => (
+        <header className="h-16 flex items-center justify-between px-6 shrink-0 bg-[#09090b]/95 backdrop-blur-md border-b border-white/5 z-50">
+            <Link href="/" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group">
+                <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+                <span className="font-semibold text-sm">Back to Home</span>
+            </Link>
+            
+            <div className="flex items-center gap-4">
+                <button onClick={share} className="flex items-center gap-2 text-gray-400 hover:text-white px-3 py-1.5 rounded-full hover:bg-white/5 transition-colors text-sm font-semibold">
+                    <Share2 size={16} /> Share
+                </button>
+                {session ? (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 p-[2px]">
+                        <div className="w-full h-full bg-gray-900 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                            {session.user.name?.[0]?.toUpperCase() || session.user.email?.[0]?.toUpperCase() || 'U'}
+                        </div>
+                    </div>
+                ) : (
+                    <Link href="/login?callbackUrl=/live" className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-indigo-700 transition-colors">
+                        <LogIn size={14} /> Log In
+                    </Link>
+                )}
+            </div>
+        </header>
+    );
+
     // ─── Loading ──────────────────────────────────────────────
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-                    <p className="text-gray-400 text-sm font-medium">Connecting to stream...</p>
+            <div className="h-screen w-full bg-[#09090b] flex flex-col">
+                <MinimalHeader />
+                <div className="flex-1 flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-4">
+                        <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                        <p className="text-gray-400 text-sm font-medium">Connecting to stream...</p>
+                    </div>
                 </div>
             </div>
         );
@@ -261,15 +289,17 @@ export default function LivePage() {
     // ─── No stream ────────────────────────────────────────────
     if (!stream) {
         return (
-            <div className="min-h-screen bg-[#09090b]">
-                <Navbar />
-                <div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-6">
-                    <div className="w-20 h-20 bg-gray-800/50 rounded-full flex items-center justify-center mb-6">
-                        <WifiOff size={36} className="text-gray-500" />
+            <div className="h-screen w-full bg-[#09090b] flex flex-col">
+                <MinimalHeader />
+                <div className="flex-1 flex items-center justify-center text-center px-6">
+                    <div>
+                        <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6 mx-auto">
+                            <WifiOff size={36} className="text-gray-500" />
+                        </div>
+                        <h1 className="text-3xl font-bold text-white mb-3">No Stream Yet</h1>
+                        <p className="text-gray-400 max-w-md mx-auto mb-8">No live stream is set up right now. Check back soon!</p>
+                        <Link href="/" className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-colors">Return to Homepage</Link>
                     </div>
-                    <h1 className="text-3xl font-bold text-white mb-3">No Stream Yet</h1>
-                    <p className="text-gray-400 max-w-md mb-8">No live stream is set up. Check back soon!</p>
-                    <Link href="/" className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-colors">Back to Home</Link>
                 </div>
             </div>
         );
@@ -278,39 +308,49 @@ export default function LivePage() {
     // ─── Scheduled ───────────────────────────────────────────
     if (stream.status === 'scheduled') {
         return (
-            <div className="min-h-screen bg-[#09090b]">
-                <Navbar />
-                <div className="flex flex-col items-center justify-center min-h-[85vh] text-center px-6">
-                    <div className="relative mb-8">
-                        <div className="w-24 h-24 bg-indigo-500/10 rounded-full flex items-center justify-center border border-indigo-500/20 shadow-[0_0_40px_rgba(99,102,241,0.2)]">
-                            <Calendar size={40} className="text-indigo-400" />
+            <div className="h-screen w-full bg-[#09090b] flex flex-col overflow-hidden">
+                <MinimalHeader />
+                <div className="flex-1 flex flex-col items-center justify-center text-center px-6 relative overflow-y-auto">
+                    {/* Background glow */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-600/10 rounded-full blur-[150px] pointer-events-none" />
+                    
+                    <div className="relative z-10 w-full max-w-4xl mx-auto flex flex-col items-center">
+                        <div className="relative mb-8">
+                            <div className="w-28 h-28 bg-indigo-500/10 rounded-full flex items-center justify-center border border-indigo-500/20 shadow-[0_0_60px_rgba(99,102,241,0.2)]">
+                                <Calendar size={48} className="text-indigo-400" />
+                            </div>
+                            <div className="absolute -top-1 -right-1 w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center shadow-lg">
+                                <Clock size={16} className="text-white" />
+                            </div>
                         </div>
-                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center">
-                            <Clock size={13} className="text-white" />
+                        
+                        <div className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 px-5 py-2 rounded-full text-indigo-400 text-sm font-bold mb-6 uppercase tracking-wider">
+                            <span className="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-pulse" /> Stream Scheduled
                         </div>
-                    </div>
-                    <div className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 px-4 py-1.5 rounded-full text-indigo-400 text-sm font-bold mb-4 uppercase tracking-wider">
-                        <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" /> Stream Scheduled
-                    </div>
-                    <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4 max-w-3xl leading-tight">{stream.title}</h1>
-                    {stream.description && <p className="text-gray-400 text-lg max-w-xl mb-10">{stream.description}</p>}
-                    {stream.scheduledAt && (
-                        <div className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl">
-                            <p className="text-indigo-300 font-semibold mb-6">STARTS IN</p>
-                            <Countdown targetDate={stream.scheduledAt} />
-                            <p className="text-gray-400 mt-8 text-sm font-medium">
-                                <Calendar className="inline-block w-4 h-4 mr-1.5 mb-0.5" />
-                                {new Date(stream.scheduledAt).toLocaleString('en-IN', { dateStyle: 'full', timeStyle: 'short' })}
-                            </p>
-                        </div>
-                    )}
-                    <div className="flex gap-3 mt-10">
-                        <button onClick={share} className="flex items-center gap-2 bg-white/5 text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-white/10 transition-colors border border-white/10">
-                            <Share2 size={16} /> Share
-                        </button>
-                        <button onClick={toggleFollow} className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-lg ${isFollowing ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-600/20'}`}>
-                            {isFollowLoading ? <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <Star size={16} className={isFollowing ? 'fill-current text-yellow-500' : ''} />}
-                            {isFollowing ? 'Following' : 'Follow Channel'}
+                        
+                        <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-tight">{stream.title}</h1>
+                        {stream.description && <p className="text-gray-400 text-xl max-w-2xl mb-12">{stream.description}</p>}
+                        
+                        {stream.scheduledAt && (
+                            <div className="bg-white/5 border border-white/10 rounded-3xl p-10 backdrop-blur-xl w-full max-w-2xl mx-auto mb-12 shadow-2xl">
+                                <p className="text-indigo-400 font-bold tracking-widest mb-8 text-sm uppercase">Starts In</p>
+                                <Countdown targetDate={stream.scheduledAt} />
+                                <p className="text-gray-400 mt-10 text-base font-medium bg-black/30 py-3 px-6 rounded-full inline-block">
+                                    <Calendar className="inline-block w-4 h-4 mr-2 mb-1" />
+                                    {new Date(stream.scheduledAt).toLocaleString('en-IN', { dateStyle: 'full', timeStyle: 'short' })}
+                                </p>
+                            </div>
+                        )}
+                        
+                        <button onClick={toggleFollow} className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-lg transition-all shadow-xl ${isFollowing ? 'bg-white/10 text-white hover:bg-white/20 border border-white/10' : 'bg-indigo-600 text-white hover:bg-indigo-500 hover:shadow-indigo-600/30'}`}>
+                            {isFollowLoading ? (
+                                <div className="w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                                <>
+                                    <Star size={22} className={isFollowing ? "fill-white" : ""} />
+                                    {isFollowing ? 'Following Channel' : 'Follow to get notified'}
+                                </>
+                            )}
                         </button>
                     </div>
                 </div>
@@ -321,31 +361,28 @@ export default function LivePage() {
     // ─── Offline / Ended ──────────────────────────────────────
     if (stream.status === 'offline' || stream.status === 'ended') {
         return (
-            <div className="min-h-screen bg-[#09090b]">
-                <Navbar />
-                <div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-6">
-                    <div className="w-24 h-24 bg-gray-900 border border-gray-800 rounded-3xl flex items-center justify-center mb-6 shadow-2xl">
-                        {stream.status === 'ended' ? <PlayCircle size={40} className="text-gray-400" /> : <WifiOff size={40} className="text-gray-500" />}
+            <div className="h-screen w-full bg-[#09090b] flex flex-col">
+                <MinimalHeader />
+                <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
+                    <div className="w-28 h-28 bg-gray-900 border border-gray-800 rounded-full flex items-center justify-center mb-8 shadow-2xl">
+                        {stream.status === 'ended' ? <PlayCircle size={48} className="text-gray-400" /> : <WifiOff size={48} className="text-gray-500" />}
                     </div>
-                    <h1 className="text-4xl font-extrabold text-white mb-4 tracking-tight">{stream.status === 'ended' ? 'Stream Ended' : 'Stream Offline'}</h1>
-                    <p className="text-gray-400 max-w-md mb-3 text-lg">
+                    <h1 className="text-5xl font-extrabold text-white mb-6 tracking-tight">{stream.status === 'ended' ? 'Stream Ended' : 'Stream Offline'}</h1>
+                    <p className="text-gray-400 max-w-xl mb-6 text-xl leading-relaxed">
                         {stream.status === 'ended' ? `"${stream.title}" has ended. The replay may be available on YouTube.` : 'No live stream is happening right now. Check back soon!'}
                     </p>
                     {stream.status === 'ended' && stream.youtubeVideoId && (
                         <a href={`https://www.youtube.com/watch?v=${stream.youtubeVideoId}`} target="_blank" rel="noopener noreferrer"
-                            className="flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-red-700 transition-colors mt-6 shadow-lg shadow-red-600/20">
-                            <PlayCircle size={18} /> Watch Replay on YouTube
+                            className="flex items-center gap-3 bg-red-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-red-700 transition-colors mt-4 shadow-lg shadow-red-600/20">
+                            <PlayCircle size={22} /> Watch Replay on YouTube
                         </a>
                     )}
-                    <Link href="/" className="text-indigo-400 hover:text-indigo-300 text-sm font-semibold mt-8 inline-flex items-center gap-1.5 transition-colors">
-                        <ArrowLeft size={16} /> Back to Home
-                    </Link>
                 </div>
             </div>
         );
     }
 
-    // ─── LIVE ─────────────────────────────────────────────────
+    // ─── LIVE (IMMERSIVE THEATER MODE) ──────────────────────────────────────
     const REACTION_LIST = [
         { emoji: '🔥', key: 'fire', label: 'Fire' },
         { emoji: '❤️', key: 'heart', label: 'Love' },
@@ -354,112 +391,93 @@ export default function LivePage() {
     ];
 
     const totalReactions = Object.values(reactions).reduce((a, b) => a + b, 0);
+    const hasYouTubeChat = stream.chatEnabled && stream.youtubeVideoId;
 
     return (
-        <div className="min-h-screen bg-[#09090b] selection:bg-indigo-500/30">
+        <div className="h-screen w-full bg-[#09090b] flex flex-col overflow-hidden selection:bg-indigo-500/30 font-sans">
             <style>{`
                 @keyframes floatUp {
                     0%   { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
-                    100% { transform: translateY(-150px) scale(1.6) rotate(15deg); opacity: 0; }
+                    100% { transform: translateY(-200px) scale(1.6) rotate(15deg); opacity: 0; }
                 }
                 .animate-float-up { animation: floatUp 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
                 
                 /* Custom Scrollbar for Chat */
                 .chat-scrollbar::-webkit-scrollbar { width: 6px; }
                 .chat-scrollbar::-webkit-scrollbar-track { background: transparent; }
-                .chat-scrollbar::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
-                .chat-scrollbar::-webkit-scrollbar-thumb:hover { background: #52525b; }
+                .chat-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+                .chat-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+
+                /* Custom Scrollbar for Main View */
+                .main-scrollbar::-webkit-scrollbar { width: 8px; }
+                .main-scrollbar::-webkit-scrollbar-track { background: #09090b; }
+                .main-scrollbar::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
+                .main-scrollbar::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
             `}</style>
 
-            <Navbar />
+            {/* Top Bar - Minimal */}
+            <MinimalHeader />
 
-            <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 py-4 sm:py-6">
+            {/* Split Layout: Left (Video+Info) | Right (Chat) */}
+            <div className="flex-1 flex flex-col lg:flex-row min-h-0 relative">
                 
-                {/* Header bar */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-                    <div className="flex items-center gap-4 flex-wrap">
-                        {/* Live Badge with glow */}
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-red-600 blur-md opacity-40 animate-pulse rounded-full"></div>
-                            <div className="relative flex items-center gap-2 bg-red-600 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-lg shadow-red-600/20">
-                                <Radio size={16} className="animate-pulse" /> LIVE NOW
-                            </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-sm font-medium text-gray-300">
-                            <Eye size={16} className="text-gray-400" />
-                            <span><strong className="text-white">{stream.viewerCount?.toLocaleString() || '0'}</strong> watching</span>
-                        </div>
-                        
-                        <div className={`flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-medium ${connected ? 'text-green-400' : 'text-amber-400'}`}>
-                            <span className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500 shadow-[0_0_8px_#22c55e] animate-pulse' : 'bg-amber-500 animate-pulse'}`} />
-                            {connected ? 'Real-time Sync On' : 'Connecting Sync...'}
-                        </div>
-                    </div>
+                {/* ── LEFT: Video & Meta (Scrollable) ── */}
+                <div className="flex-1 overflow-y-auto main-scrollbar flex flex-col">
                     
-                    <button onClick={share} className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-all border border-white/10">
-                        <Share2 size={16} /> Share Stream
-                    </button>
-                </div>
-
-                {/* Main layout */}
-                <div className="flex flex-col xl:flex-row gap-6">
-
-                    {/* ── LEFT: Player + Info + Reactions ── */}
-                    <div className="flex-1 min-w-0 flex flex-col gap-6">
-
-                        {/* YouTube Player */}
-                        <div className="rounded-3xl overflow-hidden bg-black shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10 group">
-                            <div className="aspect-video w-full relative bg-gray-900">
-                                {!embedError ? (
-                                    <iframe
-                                        key={stream.youtubeVideoId}
-                                        src={`https://www.youtube.com/embed/${stream.youtubeVideoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1`}
-                                        title={stream.title}
-                                        className="w-full h-full"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                        allowFullScreen
-                                        onError={() => setEmbedError(true)}
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex flex-col items-center justify-center text-center p-8">
-                                        <div className="w-20 h-20 bg-red-600/10 rounded-full flex items-center justify-center mb-6 border border-red-500/20">
-                                            <PlayCircle size={40} className="text-red-500" />
-                                        </div>
-                                        <p className="text-white font-extrabold text-2xl mb-3">Embedding Disabled</p>
-                                        <p className="text-gray-400 mb-8 max-w-sm text-lg leading-relaxed">The stream owner has disabled playback on external websites. Watch directly on YouTube.</p>
-                                        <a href={`https://www.youtube.com/watch?v=${stream.youtubeVideoId}`} target="_blank" rel="noopener noreferrer"
-                                            className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all shadow-lg shadow-red-600/30 hover:scale-105 active:scale-95">
-                                            <PlayCircle size={24} /> Watch Live on YouTube
-                                        </a>
+                    {/* Immersive Video Container (No padding, max width) */}
+                    <div className="w-full bg-black relative group shadow-2xl border-b border-white/5 shrink-0">
+                        <div className="aspect-video w-full max-h-[85vh] mx-auto bg-black flex items-center justify-center">
+                            {!embedError ? (
+                                <iframe
+                                    key={stream.youtubeVideoId}
+                                    src={`https://www.youtube.com/embed/${stream.youtubeVideoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1`}
+                                    title={stream.title}
+                                    className="w-full h-full max-w-[1600px]"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    allowFullScreen
+                                    onError={() => setEmbedError(true)}
+                                />
+                            ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center text-center p-8">
+                                    <div className="w-20 h-20 bg-red-600/10 rounded-full flex items-center justify-center mb-6 border border-red-500/20">
+                                        <PlayCircle size={40} className="text-red-500" />
                                     </div>
-                                )}
-                            </div>
-                            {!embedError && (
-                                <div className="bg-[#0f0f11] px-5 py-2.5 flex items-center justify-between border-t border-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <span className="text-xs text-gray-500 font-medium">Having trouble seeing the video?</span>
+                                    <p className="text-white font-extrabold text-2xl mb-3">Embedding Disabled</p>
+                                    <p className="text-gray-400 mb-8 max-w-sm text-lg leading-relaxed">The stream owner has disabled playback on external websites. Watch directly on YouTube.</p>
                                     <a href={`https://www.youtube.com/watch?v=${stream.youtubeVideoId}`} target="_blank" rel="noopener noreferrer"
-                                        className="text-xs text-red-400 hover:text-red-300 font-bold flex items-center gap-1.5 transition-colors">
-                                        <PlayCircle size={14} /> Watch on YouTube
+                                        className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all shadow-lg shadow-red-600/30 hover:scale-105 active:scale-95">
+                                        <PlayCircle size={24} /> Watch Live on YouTube
                                     </a>
                                 </div>
                             )}
                         </div>
+                        
+                        {/* Status Overlay */}
+                        <div className="absolute top-4 left-4 flex gap-2">
+                            <div className="flex items-center gap-2 bg-red-600 text-white px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider shadow-lg">
+                                <Radio size={14} className="animate-pulse" /> Live
+                            </div>
+                            <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md text-white px-3 py-1 rounded-md text-xs font-bold shadow-lg">
+                                <Eye size={14} className="text-gray-300" />
+                                {stream.viewerCount?.toLocaleString() || '0'}
+                            </div>
+                        </div>
+                    </div>
 
-                        {/* Stream Info & Follow Bar */}
-                        <div className="bg-[#121217] rounded-3xl p-6 sm:p-8 border border-white/5 shadow-xl relative overflow-hidden">
-                            {/* Decorative background gradient */}
-                            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
+                    {/* Meta Section Below Video */}
+                    <div className="flex-1 w-full max-w-[1600px] mx-auto p-4 sm:p-6 lg:p-8 flex flex-col xl:flex-row gap-8">
+                        
+                        {/* Channel & Stream Info (Left Column) */}
+                        <div className="flex-1">
+                            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2 leading-tight">{stream.title}</h1>
+                            {stream.description && <p className="text-gray-400 text-sm mb-8 leading-relaxed max-w-3xl">{stream.description}</p>}
                             
-                            <h1 className="text-2xl sm:text-3xl font-extrabold text-white mb-3 tracking-tight relative z-10">{stream.title}</h1>
-                            {stream.description && <p className="text-gray-400 text-sm sm:text-base leading-relaxed mb-6 max-w-4xl relative z-10">{stream.description}</p>}
-                            
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mt-6 pt-6 border-t border-white/10 relative z-10">
-                                {/* Channel Info */}
+                            <div className="flex flex-wrap items-center justify-between gap-6 pb-6 border-b border-white/10">
+                                {/* Channel Identity */}
                                 <div className="flex items-center gap-4">
-                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 p-[2px] shadow-lg shadow-indigo-500/20">
-                                        <div className="w-full h-full bg-gray-900 rounded-2xl flex items-center justify-center">
-                                            <span className="text-white text-xl font-bold">LM</span>
+                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 p-[2px]">
+                                        <div className="w-full h-full bg-gray-900 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                            LM
                                         </div>
                                     </div>
                                     <div>
@@ -472,21 +490,21 @@ export default function LivePage() {
                                 </div>
                                 
                                 {/* Actions */}
-                                <div className="flex items-center gap-3 w-full sm:w-auto">
+                                <div className="flex items-center gap-3">
                                     <button 
                                         onClick={toggleFollow}
                                         disabled={isFollowLoading}
-                                        className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all ${
+                                        className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-full font-bold text-sm transition-all ${
                                             isFollowing 
-                                                ? 'bg-white/10 text-white hover:bg-white/15 border border-white/10' 
-                                                : 'bg-indigo-600 text-white hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-600/30'
+                                                ? 'bg-white/10 text-white hover:bg-white/15' 
+                                                : 'bg-white text-black hover:bg-gray-200'
                                         }`}
                                     >
                                         {isFollowLoading ? (
-                                            <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                                         ) : (
                                             <>
-                                                <Star size={18} className={isFollowing ? "fill-white" : ""} />
+                                                {isFollowing ? <Star size={16} className="fill-white" /> : null}
                                                 {isFollowing ? 'Following' : 'Follow'}
                                             </>
                                         )}
@@ -495,182 +513,138 @@ export default function LivePage() {
                             </div>
                         </div>
 
-                        {/* ── Shared Reactions ── */}
-                        <div className="bg-[#121217] rounded-3xl p-6 sm:p-8 border border-white/5 shadow-xl relative overflow-hidden">
-                            <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-indigo-500/5 to-transparent pointer-events-none" />
-                            
-                            <div className="flex items-center justify-between mb-6 relative z-10">
-                                <div>
-                                    <h3 className="text-lg font-bold text-white">Live Reactions</h3>
-                                    <p className="text-xs text-gray-400 mt-1 font-medium">Tap to react! Everyone sees this instantly.</p>
-                                </div>
-                                {totalReactions > 0 && (
-                                    <div className="bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl flex items-center gap-2">
-                                        <div className="flex -space-x-2">
-                                            <span className="w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center text-[10px]">🔥</span>
-                                            <span className="w-5 h-5 rounded-full bg-pink-500/20 flex items-center justify-center text-[10px]">❤️</span>
-                                        </div>
-                                        <span className="text-sm text-gray-300 font-bold">{totalReactions.toLocaleString()} total</span>
-                                    </div>
-                                )}
-                            </div>
-                            
-                            <div className="relative z-10">
-                                {/* Floating bursts area */}
-                                <div className="absolute bottom-full left-0 w-full h-32 pointer-events-none mb-4">
-                                    <FloatingBurst bursts={bursts} />
-                                </div>
-                                <div className="grid grid-cols-4 sm:flex sm:flex-wrap gap-3 sm:gap-4">
-                                    {REACTION_LIST.map(({ emoji, key, label }) => (
-                                        <button
-                                            key={key}
-                                            onClick={() => handleReaction(emoji, key)}
-                                            className="group relative flex flex-col items-center justify-center gap-2 p-4 bg-white/5 hover:bg-white/10 active:scale-95 rounded-2xl transition-all duration-200 border border-white/10 hover:border-white/20 sm:min-w-[100px]"
-                                        >
-                                            <span className="text-3xl group-hover:scale-125 group-hover:-translate-y-1 transition-transform duration-300 drop-shadow-md">{emoji}</span>
-                                            <span className="text-xs font-bold text-gray-400 group-hover:text-white tabular-nums bg-black/40 px-2 py-0.5 rounded-full">
-                                                {reactions[key] > 0 ? reactions[key].toLocaleString() : label}
-                                            </span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* ── RIGHT: Chat + Q&A (Fixed Height on Desktop) ── */}
-                    <div className="xl:w-[450px] shrink-0 flex flex-col gap-6">
-
-                        {/* YouTube Live Chat Panel */}
-                        {stream.chatEnabled && stream.youtubeVideoId && (
-                            <div className="bg-[#121217] rounded-3xl overflow-hidden border border-white/5 shadow-xl flex flex-col h-[400px]">
-                                <div className="flex items-center gap-3 px-5 py-4 bg-[#1a1a20] border-b border-white/5">
-                                    <div className="p-2 bg-red-500/10 rounded-xl">
-                                        <Wifi size={16} className="text-red-400" />
-                                    </div>
-                                    <span className="text-sm font-bold text-white">YouTube Chat</span>
-                                    <div className="ml-auto flex items-center gap-1.5 bg-red-600 text-white px-2.5 py-1 rounded-full">
-                                        <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                                        <span className="text-[10px] font-bold uppercase tracking-wider">Live</span>
-                                    </div>
-                                </div>
-                                <div className="flex-1 bg-black">
-                                    <iframe
-                                        src={`https://www.youtube.com/live_chat?v=${stream.youtubeVideoId}&embed_domain=${typeof window !== 'undefined' ? window.location.hostname : 'courses.learnmade.in'}`}
-                                        title="Live Chat"
-                                        className="w-full h-full border-0"
-                                        allow="autoplay"
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {/* ── Shared Q&A Panel ── */}
-                        <div className="bg-[#121217] rounded-3xl border border-white/5 shadow-xl flex flex-col h-[500px]">
-                            {/* Header */}
-                            <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 bg-[#1a1a20] rounded-t-3xl">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-indigo-500/10 rounded-xl">
-                                        <MessageSquare size={16} className="text-indigo-400" />
-                                    </div>
-                                    <div>
-                                        <h2 className="font-bold text-white text-sm">Community Q&A</h2>
-                                        <p className="text-[10px] text-gray-500 font-medium">Messages are public to all</p>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <span className="text-xs font-bold text-white bg-white/10 px-2 py-1 rounded-lg">{messages.length}</span>
-                                </div>
-                            </div>
-
-                            {/* Messages list (Scrollable) */}
-                            <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-4 chat-scrollbar scroll-smooth">
-                                {messages.length === 0 ? (
-                                    <div className="h-full flex flex-col items-center justify-center text-center">
-                                        <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
-                                            <MessageSquare size={24} className="text-gray-600" />
-                                        </div>
-                                        <p className="text-white font-semibold">Quiet in here...</p>
-                                        <p className="text-sm text-gray-500 mt-1 max-w-[200px]">Be the first to drop a question or say hello!</p>
-                                    </div>
-                                ) : (
-                                    messages.map((msg) => {
-                                        const alreadyUpvoted = upvotedIds.has(msg._id);
-                                        const isMine = session?.user?.name && msg.name === session.user.name;
-                                        
-                                        return (
-                                            <div key={msg._id} className="flex items-start gap-3 group animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 p-[1px] shrink-0 mt-1">
-                                                    <div className="w-full h-full bg-gray-900 rounded-[11px] flex items-center justify-center text-white text-xs font-bold">
-                                                        {msg.name?.[0]?.toUpperCase() || 'A'}
-                                                    </div>
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <span className="text-xs font-bold text-indigo-400">{msg.name || 'Anonymous'}</span>
-                                                        {isMine && <span className="text-[9px] font-bold text-white bg-indigo-600 px-1.5 py-0.5 rounded uppercase">You</span>}
-                                                        <span className="text-[10px] text-gray-600">{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                                    </div>
-                                                    <p className="text-sm text-gray-200 leading-relaxed bg-white/5 border border-white/5 rounded-2xl rounded-tl-sm px-4 py-2.5 break-words">
-                                                        {msg.text}
-                                                    </p>
-                                                </div>
-                                                <button
-                                                    onClick={() => upvoteMessage(msg._id)}
-                                                    disabled={alreadyUpvoted}
-                                                    className={`flex flex-col items-center justify-center gap-1 w-10 h-10 rounded-xl transition-all shrink-0 mt-1 ${
-                                                        alreadyUpvoted
-                                                            ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 cursor-default'
-                                                            : 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/5 hover:border-white/20'
-                                                    }`}
-                                                    title={alreadyUpvoted ? 'Upvoted' : 'Upvote'}
-                                                >
-                                                    <ThumbsUp size={14} className={alreadyUpvoted ? 'fill-current' : ''} />
-                                                    {msg.upvotes > 0 && <span className="text-[10px] font-bold leading-none">{msg.upvotes}</span>}
-                                                </button>
-                                            </div>
-                                        );
-                                    })
-                                )}
-                            </div>
-
-                            {/* Submit form */}
-                            <div className="p-4 bg-[#1a1a20] border-t border-white/5 rounded-b-3xl">
-                                <form onSubmit={submitQuestion} className="flex flex-col gap-3">
-                                    {!session?.user?.name && (
-                                        <input
-                                            value={questionName}
-                                            onChange={e => setQuestionName(e.target.value)}
-                                            placeholder="Your display name"
-                                            maxLength={50}
-                                            className="w-full px-4 py-2 bg-black/50 border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
-                                        />
+                        {/* Reactions (Right Column) */}
+                        <div className="xl:w-80 shrink-0">
+                            <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 relative overflow-hidden">
+                                <div className="flex items-center justify-between mb-4 relative z-10">
+                                    <h3 className="text-sm font-bold text-gray-300">Live Reactions</h3>
+                                    {totalReactions > 0 && (
+                                        <span className="text-xs text-gray-500 font-bold bg-white/5 px-2 py-1 rounded-md">{totalReactions.toLocaleString()}</span>
                                     )}
-                                    <div className="relative flex items-center">
-                                        <input
-                                            value={question}
-                                            onChange={e => setQuestion(e.target.value)}
-                                            placeholder="Type your message..."
-                                            maxLength={500}
-                                            className="w-full pl-4 pr-12 py-3 bg-white/5 border border-white/10 hover:border-white/20 focus:border-indigo-500 rounded-xl text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
-                                        />
-                                        <button
-                                            type="submit"
-                                            disabled={!question.trim() || sending}
-                                            className="absolute right-1.5 p-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-all disabled:opacity-30 disabled:hover:bg-indigo-600"
-                                        >
-                                            {sending ? (
-                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                            ) : (
-                                                <Send size={16} className="-ml-0.5 mt-0.5" />
-                                            )}
-                                        </button>
+                                </div>
+                                
+                                <div className="relative z-10">
+                                    {/* Floating bursts area */}
+                                    <div className="absolute bottom-full left-0 w-full h-32 pointer-events-none mb-2">
+                                        <FloatingBurst bursts={bursts} />
                                     </div>
-                                </form>
+                                    <div className="grid grid-cols-4 gap-2">
+                                        {REACTION_LIST.map(({ emoji, key }) => (
+                                            <button
+                                                key={key}
+                                                onClick={() => handleReaction(emoji, key)}
+                                                className="group relative flex flex-col items-center justify-center gap-1.5 p-3 bg-white/5 hover:bg-white/10 active:scale-95 rounded-xl transition-all border border-transparent hover:border-white/10"
+                                            >
+                                                <span className="text-2xl group-hover:scale-125 transition-transform duration-200">{emoji}</span>
+                                                <span className="text-[10px] font-bold text-gray-500 group-hover:text-gray-300 tabular-nums">
+                                                    {reactions[key] > 0 ? (reactions[key] > 999 ? '999+' : reactions[key]) : 0}
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                {/* ── RIGHT: Chat Panel (Full Height) ── */}
+                <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0 border-t lg:border-t-0 lg:border-l border-white/10 bg-[#0f0f12] flex flex-col h-[50vh] lg:h-full relative z-20">
+                    
+                    {/* Tabs / Header */}
+                    <div className="flex items-center justify-between px-5 py-3 border-b border-white/5 shrink-0 bg-[#09090b]">
+                        <div className="flex items-center gap-2">
+                            <MessageSquare size={16} className="text-indigo-400" />
+                            <h2 className="font-bold text-white text-sm uppercase tracking-wide">Live Q&A</h2>
+                        </div>
+                        <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${connected ? 'text-green-400 bg-green-400/10' : 'text-amber-400 bg-amber-400/10'}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-green-400 animate-pulse' : 'bg-amber-400'}`} />
+                            {connected ? 'Sync On' : 'Connecting'}
+                        </div>
+                    </div>
+
+                    {/* Messages List */}
+                    <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4 chat-scrollbar scroll-smooth">
+                        {messages.length === 0 ? (
+                            <div className="h-full flex flex-col items-center justify-center text-center text-gray-500">
+                                <MessageSquare size={24} className="mb-3 opacity-50" />
+                                <p className="text-sm font-medium">Welcome to the live chat!</p>
+                                <p className="text-xs mt-1">Say hello or ask a question.</p>
+                            </div>
+                        ) : (
+                            messages.map((msg) => {
+                                const alreadyUpvoted = upvotedIds.has(msg._id);
+                                const isMine = session?.user?.name && msg.name === session.user.name;
+                                
+                                return (
+                                    <div key={msg._id} className="flex items-start gap-3 group animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white text-[10px] font-bold shrink-0 mt-0.5 border border-white/5">
+                                            {msg.name?.[0]?.toUpperCase() || 'A'}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-baseline gap-2 mb-0.5">
+                                                <span className={`text-xs font-bold ${isMine ? 'text-indigo-400' : 'text-gray-300'}`}>{msg.name || 'Anonymous'}</span>
+                                                <span className="text-[10px] text-gray-600">{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                            </div>
+                                            <p className="text-[13px] text-gray-200 leading-relaxed break-words">
+                                                {msg.text}
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={() => upvoteMessage(msg._id)}
+                                            disabled={alreadyUpvoted}
+                                            className={`flex flex-col items-center justify-center gap-0.5 w-8 h-8 rounded-lg transition-all shrink-0 mt-1 ${
+                                                alreadyUpvoted
+                                                    ? 'text-indigo-400 cursor-default'
+                                                    : 'text-gray-600 hover:text-white hover:bg-white/5'
+                                            }`}
+                                            title={alreadyUpvoted ? 'Upvoted' : 'Upvote'}
+                                        >
+                                            <ThumbsUp size={12} className={alreadyUpvoted ? 'fill-current' : ''} />
+                                            {msg.upvotes > 0 && <span className="text-[9px] font-bold leading-none">{msg.upvotes}</span>}
+                                        </button>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+
+                    {/* Chat Input */}
+                    <div className="shrink-0 p-4 border-t border-white/5 bg-[#09090b]">
+                        <form onSubmit={submitQuestion} className="flex flex-col gap-2">
+                            {!session?.user?.name && (
+                                <input
+                                    value={questionName}
+                                    onChange={e => setQuestionName(e.target.value)}
+                                    placeholder="Display name (optional)"
+                                    maxLength={50}
+                                    className="w-full px-3 py-1.5 bg-white/5 border border-transparent rounded-md text-xs text-white placeholder:text-gray-600 focus:outline-none focus:border-white/20 transition-all"
+                                />
+                            )}
+                            <div className="relative flex items-center bg-white/5 border border-white/10 focus-within:border-indigo-500 rounded-lg overflow-hidden transition-colors">
+                                <input
+                                    value={question}
+                                    onChange={e => setQuestion(e.target.value)}
+                                    placeholder="Chat publicly..."
+                                    maxLength={500}
+                                    className="w-full pl-3 pr-10 py-3 bg-transparent text-sm text-white placeholder:text-gray-500 focus:outline-none"
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={!question.trim() || sending}
+                                    className="absolute right-1 p-2 text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 rounded-md transition-all disabled:opacity-30 disabled:hover:bg-transparent"
+                                >
+                                    {sending ? (
+                                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                    ) : (
+                                        <Send size={16} />
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
             </div>
         </div>
     );
