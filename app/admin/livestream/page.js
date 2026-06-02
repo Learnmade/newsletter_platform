@@ -277,6 +277,18 @@ export default function AdminLiveStreamPage() {
                 </div>
             )}
 
+            {/* ⚠️ Embedding Warning - Always visible */}
+            <div className="bg-amber-50 border border-amber-300 rounded-2xl p-4 flex gap-3">
+                <Info size={18} className="text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                    <p className="text-sm font-bold text-amber-800">⚠️ Critical: Enable Embedding on YouTube</p>
+                    <p className="text-xs text-amber-700 mt-1 leading-relaxed">
+                        Before going live, you MUST enable embedding on your YouTube stream. Without this, viewers will see "Video unavailable" error.
+                        Go to <strong>YouTube Studio → Go Live → Edit stream → More options → Check ✅ "Allow embedding"</strong>.
+                    </p>
+                </div>
+            </div>
+
             {/* Main Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
 
@@ -423,45 +435,58 @@ export default function AdminLiveStreamPage() {
                                             title: 'Get your YouTube Stream Key',
                                             desc: 'Go to YouTube Studio → Go Live → Stream (tab) → Copy the "Stream key" shown on the page.',
                                             color: 'bg-red-100 text-red-700',
+                                            critical: false,
+                                        },
+                                        {
+                                            step: '⚠',
+                                            title: '🔴 CRITICAL: Enable Embedding (do this first!)',
+                                            desc: 'In YouTube Studio → Go Live → click "Edit" on your stream → More options → check the box ✅ "Allow embedding". WITHOUT THIS, viewers will see "Video unavailable" on your site.',
+                                            color: 'bg-red-600 text-white',
+                                            critical: true,
                                         },
                                         {
                                             step: 2,
                                             title: 'Configure OBS',
                                             desc: 'In OBS: File → Settings → Stream. Set Service = "YouTube - RTMPS", Server = "Primary YouTube ingest server", and paste your Stream Key.',
                                             color: 'bg-orange-100 text-orange-700',
+                                            critical: false,
                                         },
                                         {
                                             step: 3,
                                             title: 'Set up your scene in OBS',
                                             desc: 'Add your video/audio sources, set output resolution to 1080p, bitrate to 4500 Kbps for best quality.',
                                             color: 'bg-yellow-100 text-yellow-700',
+                                            critical: false,
                                         },
                                         {
                                             step: 4,
                                             title: 'Start Streaming in OBS',
                                             desc: 'Click "Start Streaming" in OBS. Return to YouTube Studio and click "Go Live". Your stream will begin.',
                                             color: 'bg-green-100 text-green-700',
+                                            critical: false,
                                         },
                                         {
                                             step: 5,
                                             title: 'Get the YouTube Video ID',
                                             desc: 'Once live, your YouTube stream URL looks like: youtube.com/watch?v=XXXXXXXXXXX — copy the 11-character ID after "v=".',
                                             color: 'bg-blue-100 text-blue-700',
+                                            critical: false,
                                         },
                                         {
                                             step: 6,
                                             title: 'Paste ID here & Go Live',
                                             desc: 'Paste the Video ID in the field above, click "Save Settings", then click "Go Live" button. Your viewers on /live will see the stream instantly!',
                                             color: 'bg-purple-100 text-purple-700',
+                                            critical: false,
                                         },
-                                    ].map(({ step, title, desc, color }) => (
-                                        <div key={step} className="flex gap-3">
+                                    ].map(({ step, title, desc, color, critical }) => (
+                                        <div key={step} className={`flex gap-3 ${critical ? 'p-3 bg-red-50 border border-red-200 rounded-xl' : ''}`}>
                                             <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${color}`}>
                                                 {step}
                                             </div>
                                             <div>
-                                                <p className="text-sm font-semibold text-gray-900">{title}</p>
-                                                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{desc}</p>
+                                                <p className={`text-sm font-semibold ${critical ? 'text-red-700' : 'text-gray-900'}`}>{title}</p>
+                                                <p className={`text-xs mt-0.5 leading-relaxed ${critical ? 'text-red-600' : 'text-gray-500'}`}>{desc}</p>
                                             </div>
                                         </div>
                                     ))}

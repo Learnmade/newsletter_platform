@@ -71,6 +71,7 @@ function FloatingReaction({ emoji, id }) {
 export default function LivePage() {
     const [stream, setStream] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [embedError, setEmbedError] = useState(false);
     const [reactions, setReactions] = useState([]);
     const [reactionCounts, setReactionCounts] = useState({ '🔥': 0, '❤️': 0, '🙌': 0, '💡': 0 });
     const [question, setQuestion] = useState('');
@@ -94,6 +95,22 @@ export default function LivePage() {
         pollRef.current = setInterval(fetchStream, 30000);
         return () => clearInterval(pollRef.current);
     }, [fetchStream]);
+
+    // Detect YouTube embed blocked via postMessage
+    useEffect(() => {
+        const handleMessage = (e) => {
+            if (!e.origin.includes('youtube.com')) return;
+            try {
+                const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+                // YouTube sends this when video is blocked from embedding
+                if (data?.event === 'onError' || data?.info === 101 || data?.info === 150) {
+                    setEmbedError(true);
+                }
+            } catch (_) {}
+        };
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, []);
 
     const addReaction = (emoji) => {
         const id = Date.now() + Math.random();
@@ -284,15 +301,53 @@ export default function LivePage() {
 
                         {/* YouTube Player */}
                         <div className="rounded-2xl overflow-hidden bg-black shadow-2xl shadow-red-900/20">
-                            <div className="aspect-video w-full">
-                                <iframe
-                                    src={`https://www.youtube.com/embed/${stream.youtubeVideoId}?autoplay=1&rel=0&modestbranding=1`}
-                                    title={stream.title}
-                                    className="w-full h-full"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                    allowFullScreen
-                                />
+                            <div className="aspect-video w-full relative">
+                                {!embedError ? (
+                                    <iframe
+                                        key={stream.youtubeVideoId}
+                                        src={`https://www.youtube.com/embed/${stream.youtubeVideoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1`}
+                                        title={stream.title}
+                                        className="w-full h-full"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                        allowFullScreen
+                                        onError={() => setEmbedError(true)}
+                                    />
+                                ) : (
+                                    // Fallback when embedding is disabled
+                                    <div className="w-full h-full flex flex-col items-center justify-center text-center p-8 bg-gray-900">
+                                        <div className="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mb-4">
+                                            <PlayCircle size={32} className="text-red-400" />
+                                        </div>
+                                        <p className="text-white font-bold text-lg mb-2">Embedding Disabled</p>
+                                        <p className="text-gray-400 text-sm mb-6 max-w-xs">
+                                            The stream owner has disabled playback on external websites. Watch directly on YouTube.
+                                        </p>
+                                        <a
+                                            href={`https://www.youtube.com/watch?v=${stream.youtubeVideoId}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-bold transition-colors"
+                                        >
+                                            <PlayCircle size={18} />
+                                            Watch Live on YouTube
+                                        </a>
+                                    </div>
+                                )}
                             </div>
+                            {/* Always-visible YouTube escape link */}
+                            {!embedError && (
+                                <div className="bg-gray-950 px-4 py-2 flex items-center justify-between">
+                                    <span className="text-xs text-gray-600">Having trouble seeing the video?</span>
+                                    <a
+                                        href={`https://www.youtube.com/watch?v=${stream.youtubeVideoId}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-xs text-red-400 hover:text-red-300 font-semibold flex items-center gap-1"
+                                    >
+                                        <PlayCircle size={12} /> Watch on YouTube
+                                    </a>
+                                </div>
+                            )}
                         </div>
 
                         {/* Stream Title & Description */}
