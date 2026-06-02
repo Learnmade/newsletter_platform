@@ -10,6 +10,7 @@ function HomeContent() {
     const [courses, setCourses] = useState([]);
     const [videoCourses, setVideoCourses] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [liveStream, setLiveStream] = useState(null);
     const searchParams = useSearchParams();
     const rawQuery = searchParams.get('search');
     const searchQuery = rawQuery?.trim() || null; // treat empty string as null
@@ -25,6 +26,11 @@ function HomeContent() {
         fetch('/api/video-courses?status=published')
             .then(r => r.json())
             .then(d => { if (d.success) setVideoCourses(d.data.slice(0, 3)); });
+        // Fetch live stream status
+        fetch('/api/livestream')
+            .then(r => r.json())
+            .then(d => { if (d.success && d.data?.status === 'live') setLiveStream(d.data); })
+            .catch(() => {});
     }, [searchQuery]);
 
     const fetchCourses = async () => {
@@ -79,6 +85,29 @@ function HomeContent() {
     return (
         <div className="min-h-screen bg-gray-50">
             <Navbar />
+
+            {/* 🔴 LIVE NOW Banner */}
+            {liveStream && (
+                <div className="bg-red-600 text-white py-3 px-4 shadow-lg animate-in slide-in-from-top">
+                    <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 flex-wrap">
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full text-sm font-bold">
+                                <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                                LIVE
+                            </div>
+                            <p className="font-semibold text-sm md:text-base truncate max-w-sm">
+                                {liveStream.title || 'Live Stream is happening now!'}
+                            </p>
+                        </div>
+                        <a
+                            href="/live"
+                            className="flex items-center gap-2 bg-white text-red-600 px-4 py-1.5 rounded-full text-sm font-bold hover:bg-red-50 transition-colors whitespace-nowrap shrink-0"
+                        >
+                            Watch Live →
+                        </a>
+                    </div>
+                </div>
+            )}
 
             {/* Hero Section */}
             <div className="bg-white border-b border-gray-200 pt-16 pb-24 lg:pt-24 lg:pb-32">
