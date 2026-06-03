@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@codesandbox/sandpack-react": "^2.20.0",
     "autoprefixer": "^10.4.23",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.8.0",

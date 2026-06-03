@@ -45,6 +45,11 @@ export async function GET(request) {
                         lastPing: { $gt: new Date(Date.now() - 15000) }
                     });
 
+                    // Get Chapters
+                    const chapters = await mongoose.models.LiveChapter.find({ streamId: liveStream._id })
+                        .sort({ timestamp: 1 })
+                        .lean();
+
                     // Get latest 80 messages for this stream
                     const messages = await LiveMessage.find({ streamId: liveStream._id })
                         .sort({ createdAt: 1 })
@@ -66,6 +71,7 @@ export async function GET(request) {
                         status: liveStream.status,
                         pinnedResource: liveStream.pinnedResource || { title: '', url: '' },
                         activeViewers: activeViewers,
+                        chapters: chapters.map(c => ({ _id: c._id.toString(), title: c.title, timestamp: c.timestamp }))
                     });
                 } catch (err) {
                     // Don't crash SSE on DB error — just skip this tick
