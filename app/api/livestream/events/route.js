@@ -1,6 +1,7 @@
 import dbConnect from '@/lib/db';
 import LiveMessage from '@/models/LiveMessage';
 import LiveStream from '@/models/LiveStream';
+import ActiveViewer from '@/models/ActiveViewer';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -30,13 +31,19 @@ export async function GET(request) {
                     // Get the current stream
                     const liveStream = await LiveStream.findOne()
                         .sort({ updatedAt: -1 })
-                        .select('reactions status')
+                        .select('reactions status pinnedResource')
                         .lean();
 
                     if (!liveStream) {
-                        send({ type: 'update', messages: [], reactions: { fire: 0, heart: 0, clap: 0, idea: 0 } });
+                        send({ type: 'update', messages: [], reactions: { fire: 0, heart: 0, clap: 0, idea: 0 }, activeViewers: 0 });
                         return;
                     }
+
+                    // Get real-time active viewer count (pinged in the last 15s)
+                    const activeViewers = await ActiveViewer.countDocuments({
+                        streamId: liveStream._id,
+                        lastPing: { $gt: new Date(Date.now() - 15000) }
+                    });
 
                     // Get latest 80 messages for this stream
                     const messages = await LiveMessage.find({ streamId: liveStream._id })
@@ -50,11 +57,15 @@ export async function GET(request) {
                             _id: m._id.toString(),
                             name: m.name,
                             text: m.text,
+                            isCodeSnippet: m.isCodeSnippet,
+                            language: m.language,
                             upvotes: m.upvotes,
                             createdAt: m.createdAt,
                         })),
                         reactions: liveStream.reactions || { fire: 0, heart: 0, clap: 0, idea: 0 },
                         status: liveStream.status,
+                        pinnedResource: liveStream.pinnedResource || { title: '', url: '' },
+                        activeViewers: activeViewers,
                     });
                 } catch (err) {
                     // Don't crash SSE on DB error — just skip this tick

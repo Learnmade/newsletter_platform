@@ -6,7 +6,8 @@ import { useSession } from 'next-auth/react';
 import {
     Radio, Eye, Calendar, Clock, ThumbsUp,
     Send, ChevronRight, ArrowLeft, Share2, Bell,
-    WifiOff, PlayCircle, MessageSquare, Wifi, Users, Star, LogIn
+    WifiOff, PlayCircle, MessageSquare, Wifi, Users, Star, LogIn,
+    Code, Copy, CheckCircle2, Link as LinkIcon
 } from 'lucide-react';
 
 // ─── Countdown Timer ─────────────────────────────────────────────────────────
@@ -80,6 +81,8 @@ export default function LivePage() {
     const [messages, setMessages] = useState([]);
     const [reactions, setReactions] = useState({ fire: 0, heart: 0, clap: 0, idea: 0 });
     const [connected, setConnected] = useState(false);
+    const [activeViewers, setActiveViewers] = useState(0);
+    const [pinnedResource, setPinnedResource] = useState({ title: '', url: '' });
 
     // Local UI state
     const [bursts, setBursts] = useState([]);        // floating emojis animation
@@ -87,10 +90,15 @@ export default function LivePage() {
     const [questionName, setQuestionName] = useState('');
     const [sending, setSending] = useState(false);
     const [upvotedIds, setUpvotedIds] = useState(new Set()); // prevent double upvote
+    const [isCodeMode, setIsCodeMode] = useState(false); // Code snippet input mode
+    const [copiedId, setCopiedId] = useState(null); // Which snippet is currently copied
 
     const messagesContainerRef = useRef(null);
     const pollRef = useRef(null);
     const eventSourceRef = useRef(null);
+
+    // Unique viewer ID for heartbeat
+    const [viewerId] = useState(() => Math.random().toString(36).substring(2) + Date.now().toString(36));
 
     // ── Fetch stream & follower info ───────────────────────────
     const fetchStream = useCallback(async () => {
@@ -116,9 +124,26 @@ export default function LivePage() {
     useEffect(() => {
         fetchStream();
         fetchFollowData();
-        pollRef.current = setInterval(fetchStream, 30000);
+        pollRef.current = setInterval(fetchStream, 60000); // Less frequent polling since SSE handles real-time
         return () => clearInterval(pollRef.current);
     }, [fetchStream, fetchFollowData]);
+
+    // ── Real-time Ping Heartbeat ────────────────────────────────
+    useEffect(() => {
+        if (!stream) return;
+        const ping = async () => {
+            try {
+                await fetch('/api/livestream/ping', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ viewerId })
+                });
+            } catch (e) {}
+        };
+        ping(); // initial
+        const interval = setInterval(ping, 5000); // every 5s
+        return () => clearInterval(interval);
+    }, [stream, viewerId]);
 
     // ── SSE: connect for real-time messages + reactions ─────────
     useEffect(() => {
@@ -135,6 +160,8 @@ export default function LivePage() {
                 if (payload.type === 'update') {
                     setMessages(payload.messages || []);
                     setReactions(payload.reactions || { fire: 0, heart: 0, clap: 0, idea: 0 });
+                    if (payload.activeViewers !== undefined) setActiveViewers(payload.activeViewers);
+                    if (payload.pinnedResource) setPinnedResource(payload.pinnedResource);
                 }
             } catch (_) {}
         };
@@ -166,12 +193,10 @@ export default function LivePage() {
 
     // ── Reaction: fire to server + animate locally ─────────────
     const handleReaction = async (emoji, key) => {
-        // Optimistic local burst animation
         const id = Date.now() + Math.random();
         setBursts(prev => [...prev.slice(-10), { id, emoji, x: 20 + Math.random() * 60, delay: Math.random() * 0.2 }]);
         setTimeout(() => setBursts(prev => prev.filter(b => b.id !== id)), 2600);
 
-        // Persist to server (all viewers see via SSE)
         try {
             await fetch('/api/livestream/reactions', {
                 method: 'PATCH',
@@ -181,7 +206,7 @@ export default function LivePage() {
         } catch (_) {}
     };
 
-    // ── Submit Q&A message ─────────────────────────────────────
+    // ── Submit Q&A / Code Snippet ──────────────────────────────
     const submitQuestion = async (e) => {
         e.preventDefault();
         if (!question.trim() || sending) return;
@@ -190,7 +215,12 @@ export default function LivePage() {
             await fetch('/api/livestream/messages', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: questionName.trim() || session?.user?.name || 'Anonymous', text: question.trim() }),
+                body: JSON.stringify({ 
+                    name: questionName.trim() || session?.user?.name || 'Anonymous', 
+                    text: question.trim(),
+                    isCodeSnippet: isCodeMode,
+                    language: 'javascript'
+                }),
             });
             setQuestion('');
         } catch (_) {
@@ -202,7 +232,7 @@ export default function LivePage() {
 
     // ── Upvote a message ───────────────────────────────────────
     const upvoteMessage = async (id) => {
-        if (upvotedIds.has(id)) return; // already upvoted
+        if (upvotedIds.has(id)) return;
         setUpvotedIds(prev => new Set([...prev, id]));
         try {
             await fetch('/api/livestream/messages', {
@@ -211,6 +241,13 @@ export default function LivePage() {
                 body: JSON.stringify({ id }),
             });
         } catch (_) {}
+    };
+
+    // ── Copy Code Snippet ──────────────────────────────────────
+    const copyToClipboard = (id, text) => {
+        navigator.clipboard.writeText(text);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
     };
 
     // ── Toggle Follow Status ───────────────────────────────────
@@ -391,7 +428,6 @@ export default function LivePage() {
     ];
 
     const totalReactions = Object.values(reactions).reduce((a, b) => a + b, 0);
-    const hasYouTubeChat = stream.chatEnabled && stream.youtubeVideoId;
 
     return (
         <div className="h-screen w-full bg-[#09090b] flex flex-col overflow-hidden selection:bg-indigo-500/30 font-sans">
@@ -402,29 +438,34 @@ export default function LivePage() {
                 }
                 .animate-float-up { animation: floatUp 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
                 
-                /* Custom Scrollbar for Chat */
-                .chat-scrollbar::-webkit-scrollbar { width: 6px; }
-                .chat-scrollbar::-webkit-scrollbar-track { background: transparent; }
-                .chat-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
-                .chat-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
-
-                /* Custom Scrollbar for Main View */
-                .main-scrollbar::-webkit-scrollbar { width: 8px; }
-                .main-scrollbar::-webkit-scrollbar-track { background: #09090b; }
-                .main-scrollbar::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
-                .main-scrollbar::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+                /* Custom Scrollbar */
+                .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
             `}</style>
 
-            {/* Top Bar - Minimal */}
             <MinimalHeader />
 
-            {/* Split Layout: Left (Video+Info) | Right (Chat) */}
             <div className="flex-1 flex flex-col lg:flex-row min-h-0 relative">
                 
-                {/* ── LEFT: Video & Meta (Scrollable) ── */}
-                <div className="flex-1 overflow-y-auto main-scrollbar flex flex-col">
+                {/* ── LEFT: Video & Meta ── */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col relative">
                     
-                    {/* Immersive Video Container (No padding, max width) */}
+                    {/* Pinned Resource Banner */}
+                    {pinnedResource?.url && (
+                        <div className="bg-indigo-600 text-white px-4 py-2 flex items-center justify-center gap-3 shrink-0 shadow-lg relative z-20">
+                            <div className="bg-white/20 p-1.5 rounded-lg">
+                                <LinkIcon size={14} />
+                            </div>
+                            <span className="text-sm font-semibold">{pinnedResource.title || 'Current Resource'}</span>
+                            <a href={pinnedResource.url} target="_blank" rel="noopener noreferrer" className="ml-2 bg-white text-indigo-700 px-3 py-1 rounded-md text-xs font-bold hover:bg-gray-100 transition-colors">
+                                View
+                            </a>
+                        </div>
+                    )}
+
+                    {/* Immersive Video Container */}
                     <div className="w-full bg-black relative group shadow-2xl border-b border-white/5 shrink-0">
                         <div className="aspect-video w-full max-h-[85vh] mx-auto bg-black flex items-center justify-center">
                             {!embedError ? (
@@ -445,35 +486,33 @@ export default function LivePage() {
                                     <p className="text-white font-extrabold text-2xl mb-3">Embedding Disabled</p>
                                     <p className="text-gray-400 mb-8 max-w-sm text-lg leading-relaxed">The stream owner has disabled playback on external websites. Watch directly on YouTube.</p>
                                     <a href={`https://www.youtube.com/watch?v=${stream.youtubeVideoId}`} target="_blank" rel="noopener noreferrer"
-                                        className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all shadow-lg shadow-red-600/30 hover:scale-105 active:scale-95">
+                                        className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all">
                                         <PlayCircle size={24} /> Watch Live on YouTube
                                     </a>
                                 </div>
                             )}
                         </div>
                         
-                        {/* Status Overlay */}
                         <div className="absolute top-4 left-4 flex gap-2">
                             <div className="flex items-center gap-2 bg-red-600 text-white px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider shadow-lg">
                                 <Radio size={14} className="animate-pulse" /> Live
                             </div>
-                            <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md text-white px-3 py-1 rounded-md text-xs font-bold shadow-lg">
+                            <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md text-white px-3 py-1 rounded-md text-xs font-bold shadow-lg" title="Real-time Active Viewers">
                                 <Eye size={14} className="text-gray-300" />
-                                {stream.viewerCount?.toLocaleString() || '0'}
+                                {activeViewers.toLocaleString()}
                             </div>
                         </div>
                     </div>
 
-                    {/* Meta Section Below Video */}
+                    {/* Meta Section */}
                     <div className="flex-1 w-full max-w-[1600px] mx-auto p-4 sm:p-6 lg:p-8 flex flex-col xl:flex-row gap-8">
                         
-                        {/* Channel & Stream Info (Left Column) */}
+                        {/* Channel & Stream Info */}
                         <div className="flex-1">
                             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2 leading-tight">{stream.title}</h1>
                             {stream.description && <p className="text-gray-400 text-sm mb-8 leading-relaxed max-w-3xl">{stream.description}</p>}
                             
                             <div className="flex flex-wrap items-center justify-between gap-6 pb-6 border-b border-white/10">
-                                {/* Channel Identity */}
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 p-[2px]">
                                         <div className="w-full h-full bg-gray-900 rounded-full flex items-center justify-center text-white font-bold text-lg">
@@ -489,31 +528,28 @@ export default function LivePage() {
                                     </div>
                                 </div>
                                 
-                                {/* Actions */}
-                                <div className="flex items-center gap-3">
-                                    <button 
-                                        onClick={toggleFollow}
-                                        disabled={isFollowLoading}
-                                        className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-full font-bold text-sm transition-all ${
-                                            isFollowing 
-                                                ? 'bg-white/10 text-white hover:bg-white/15' 
-                                                : 'bg-white text-black hover:bg-gray-200'
-                                        }`}
-                                    >
-                                        {isFollowLoading ? (
-                                            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                                        ) : (
-                                            <>
-                                                {isFollowing ? <Star size={16} className="fill-white" /> : null}
-                                                {isFollowing ? 'Following' : 'Follow'}
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
+                                <button 
+                                    onClick={toggleFollow}
+                                    disabled={isFollowLoading}
+                                    className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-full font-bold text-sm transition-all ${
+                                        isFollowing 
+                                            ? 'bg-white/10 text-white hover:bg-white/15' 
+                                            : 'bg-white text-black hover:bg-gray-200'
+                                    }`}
+                                >
+                                    {isFollowLoading ? (
+                                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                    ) : (
+                                        <>
+                                            {isFollowing ? <Star size={16} className="fill-white" /> : null}
+                                            {isFollowing ? 'Following' : 'Follow'}
+                                        </>
+                                    )}
+                                </button>
                             </div>
                         </div>
 
-                        {/* Reactions (Right Column) */}
+                        {/* Reactions */}
                         <div className="xl:w-80 shrink-0">
                             <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 relative overflow-hidden">
                                 <div className="flex items-center justify-between mb-4 relative z-10">
@@ -524,7 +560,6 @@ export default function LivePage() {
                                 </div>
                                 
                                 <div className="relative z-10">
-                                    {/* Floating bursts area */}
                                     <div className="absolute bottom-full left-0 w-full h-32 pointer-events-none mb-2">
                                         <FloatingBurst bursts={bursts} />
                                     </div>
@@ -548,14 +583,13 @@ export default function LivePage() {
                     </div>
                 </div>
 
-                {/* ── RIGHT: Chat Panel (Full Height) ── */}
+                {/* ── RIGHT: Chat Panel ── */}
                 <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0 border-t lg:border-t-0 lg:border-l border-white/10 bg-[#0f0f12] flex flex-col h-[50vh] lg:h-full relative z-20">
                     
-                    {/* Tabs / Header */}
                     <div className="flex items-center justify-between px-5 py-3 border-b border-white/5 shrink-0 bg-[#09090b]">
                         <div className="flex items-center gap-2">
                             <MessageSquare size={16} className="text-indigo-400" />
-                            <h2 className="font-bold text-white text-sm uppercase tracking-wide">Live Q&A</h2>
+                            <h2 className="font-bold text-white text-sm uppercase tracking-wide">Developer Q&A</h2>
                         </div>
                         <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${connected ? 'text-green-400 bg-green-400/10' : 'text-amber-400 bg-amber-400/10'}`}>
                             <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-green-400 animate-pulse' : 'bg-amber-400'}`} />
@@ -563,13 +597,12 @@ export default function LivePage() {
                         </div>
                     </div>
 
-                    {/* Messages List */}
-                    <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4 chat-scrollbar scroll-smooth">
+                    <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-5 custom-scrollbar scroll-smooth">
                         {messages.length === 0 ? (
                             <div className="h-full flex flex-col items-center justify-center text-center text-gray-500">
-                                <MessageSquare size={24} className="mb-3 opacity-50" />
-                                <p className="text-sm font-medium">Welcome to the live chat!</p>
-                                <p className="text-xs mt-1">Say hello or ask a question.</p>
+                                <Code size={24} className="mb-3 opacity-50" />
+                                <p className="text-sm font-medium">Welcome to the stream!</p>
+                                <p className="text-xs mt-1 max-w-[200px]">Ask questions or share code snippets with the community.</p>
                             </div>
                         ) : (
                             messages.map((msg) => {
@@ -582,13 +615,32 @@ export default function LivePage() {
                                             {msg.name?.[0]?.toUpperCase() || 'A'}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-baseline gap-2 mb-0.5">
+                                            <div className="flex items-baseline gap-2 mb-1.5">
                                                 <span className={`text-xs font-bold ${isMine ? 'text-indigo-400' : 'text-gray-300'}`}>{msg.name || 'Anonymous'}</span>
                                                 <span className="text-[10px] text-gray-600">{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                             </div>
-                                            <p className="text-[13px] text-gray-200 leading-relaxed break-words">
-                                                {msg.text}
-                                            </p>
+                                            
+                                            {msg.isCodeSnippet ? (
+                                                <div className="bg-[#1e1e1e] rounded-lg border border-white/10 overflow-hidden relative group/code">
+                                                    <div className="flex justify-between items-center px-3 py-1.5 bg-black/40 border-b border-white/5">
+                                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{msg.language || 'Code'}</span>
+                                                        <button 
+                                                            onClick={() => copyToClipboard(msg._id, msg.text)}
+                                                            className="text-gray-400 hover:text-white transition-colors"
+                                                            title="Copy Code"
+                                                        >
+                                                            {copiedId === msg._id ? <CheckCircle2 size={12} className="text-green-400" /> : <Copy size={12} />}
+                                                        </button>
+                                                    </div>
+                                                    <pre className="p-3 overflow-x-auto custom-scrollbar text-[11px] sm:text-xs text-gray-300 font-mono leading-relaxed">
+                                                        <code>{msg.text}</code>
+                                                    </pre>
+                                                </div>
+                                            ) : (
+                                                <p className="text-[13px] text-gray-200 leading-relaxed break-words">
+                                                    {msg.text}
+                                                </p>
+                                            )}
                                         </div>
                                         <button
                                             onClick={() => upvoteMessage(msg._id)}
@@ -598,7 +650,6 @@ export default function LivePage() {
                                                     ? 'text-indigo-400 cursor-default'
                                                     : 'text-gray-600 hover:text-white hover:bg-white/5'
                                             }`}
-                                            title={alreadyUpvoted ? 'Upvoted' : 'Upvote'}
                                         >
                                             <ThumbsUp size={12} className={alreadyUpvoted ? 'fill-current' : ''} />
                                             {msg.upvotes > 0 && <span className="text-[9px] font-bold leading-none">{msg.upvotes}</span>}
@@ -609,36 +660,51 @@ export default function LivePage() {
                         )}
                     </div>
 
-                    {/* Chat Input */}
+                    {/* Chat / Snippet Input */}
                     <div className="shrink-0 p-4 border-t border-white/5 bg-[#09090b]">
-                        <form onSubmit={submitQuestion} className="flex flex-col gap-2">
-                            {!session?.user?.name && (
-                                <input
-                                    value={questionName}
-                                    onChange={e => setQuestionName(e.target.value)}
-                                    placeholder="Display name (optional)"
-                                    maxLength={50}
-                                    className="w-full px-3 py-1.5 bg-white/5 border border-transparent rounded-md text-xs text-white placeholder:text-gray-600 focus:outline-none focus:border-white/20 transition-all"
-                                />
-                            )}
-                            <div className="relative flex items-center bg-white/5 border border-white/10 focus-within:border-indigo-500 rounded-lg overflow-hidden transition-colors">
-                                <input
-                                    value={question}
-                                    onChange={e => setQuestion(e.target.value)}
-                                    placeholder="Chat publicly..."
-                                    maxLength={500}
-                                    className="w-full pl-3 pr-10 py-3 bg-transparent text-sm text-white placeholder:text-gray-500 focus:outline-none"
-                                />
+                        <form onSubmit={submitQuestion} className="flex flex-col gap-3">
+                            <div className="flex items-center justify-between">
+                                {!session?.user?.name ? (
+                                    <input
+                                        value={questionName}
+                                        onChange={e => setQuestionName(e.target.value)}
+                                        placeholder="Display name"
+                                        maxLength={50}
+                                        className="w-1/2 px-3 py-1.5 bg-white/5 border border-transparent rounded-md text-xs text-white placeholder:text-gray-600 focus:outline-none focus:border-white/20 transition-all"
+                                    />
+                                ) : <div />}
+                                <button 
+                                    type="button" 
+                                    onClick={() => setIsCodeMode(!isCodeMode)}
+                                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold transition-all ml-auto ${isCodeMode ? 'bg-indigo-600 text-white' : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'}`}
+                                >
+                                    <Code size={12} /> Snippet Mode
+                                </button>
+                            </div>
+                            
+                            <div className="relative flex bg-white/5 border border-white/10 focus-within:border-indigo-500 rounded-lg overflow-hidden transition-colors">
+                                {isCodeMode ? (
+                                    <textarea
+                                        value={question}
+                                        onChange={e => setQuestion(e.target.value)}
+                                        placeholder="Paste your code snippet here..."
+                                        className="w-full h-24 pl-3 pr-10 py-3 bg-transparent text-xs text-gray-300 font-mono placeholder:text-gray-600 focus:outline-none resize-none custom-scrollbar"
+                                    />
+                                ) : (
+                                    <input
+                                        value={question}
+                                        onChange={e => setQuestion(e.target.value)}
+                                        placeholder="Chat publicly..."
+                                        maxLength={500}
+                                        className="w-full pl-3 pr-10 py-3 bg-transparent text-sm text-white placeholder:text-gray-500 focus:outline-none"
+                                    />
+                                )}
                                 <button
                                     type="submit"
                                     disabled={!question.trim() || sending}
-                                    className="absolute right-1 p-2 text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 rounded-md transition-all disabled:opacity-30 disabled:hover:bg-transparent"
+                                    className={`absolute right-1 bottom-1 p-2 rounded-md transition-all ${!question.trim() || sending ? 'opacity-30' : 'text-indigo-400 hover:bg-indigo-500/10 hover:text-indigo-300'}`}
                                 >
-                                    {sending ? (
-                                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                                    ) : (
-                                        <Send size={16} />
-                                    )}
+                                    {sending ? <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <Send size={16} />}
                                 </button>
                             </div>
                         </form>

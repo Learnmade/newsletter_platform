@@ -14,7 +14,15 @@ const LiveMessageSchema = new mongoose.Schema({
     text: {
         type: String,
         required: true,
-        maxlength: 500,
+        maxlength: 5000, // increased to allow larger code snippets
+    },
+    isCodeSnippet: {
+        type: Boolean,
+        default: false,
+    },
+    language: {
+        type: String,
+        default: 'javascript',
     },
     upvotes: {
         type: Number,

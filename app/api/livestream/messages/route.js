@@ -25,7 +25,7 @@ export async function GET() {
 export async function POST(request) {
     try {
         await dbConnect();
-        const { name, text } = await request.json();
+        const { name, text, isCodeSnippet, language } = await request.json();
 
         if (!text?.trim()) {
             return NextResponse.json({ success: false, error: 'Message text is required' }, { status: 400 });
@@ -39,7 +39,9 @@ export async function POST(request) {
         const message = await LiveMessage.create({
             streamId: stream._id,
             name: name?.trim() || 'Anonymous',
-            text: text.trim().slice(0, 500),
+            text: text.trim().slice(0, 5000),
+            isCodeSnippet: !!isCodeSnippet,
+            language: language || 'javascript',
         });
 
         return NextResponse.json({ success: true, data: message }, { status: 201 });

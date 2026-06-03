@@ -45,6 +45,10 @@ const LiveStreamSchema = new mongoose.Schema({
         clap: { type: Number, default: 0 },
         idea: { type: Number, default: 0 },
     },
+    pinnedResource: {
+        title: { type: String, default: '' },
+        url: { type: String, default: '' },
+    },
 }, { timestamps: true });
 
 export default mongoose.models.LiveStream || mongoose.model('LiveStream', LiveStreamSchema);
